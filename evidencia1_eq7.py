@@ -1,9 +1,23 @@
+import datetime
 def agregar_nota(notas):
-    nombre = input("Ingrese el nombre del cliente: ")
-    servicio = input("Ingrese el tipo de servicio: ")
-    costo = float(input("Ingrese el costo del servicio: "))
-    notas.append({"nombre": nombre, "servicio": servicio, "costo": costo, "cancelada": False})
-    print("Nota registrada con éxito!")
+    nota={}
+    folio=max(nota.keys(), default=1000)+1
+    fecha=datetime.datetime.today().date()
+    cliente=input("Ingrese el nombre del cliente: ")
+    monto_pago=0
+    detalle=""
+    while True:
+        servicio=input("Ingrese el detalle del servicio realizado: ") #Ingresar más de un servicio
+        if servicio.strip()=="":
+            break
+        costo_servicio=float(input("Ingrese el costo del servicio: "))
+        monto_pago+=costo_servicio #suma de los costos del servicio
+        sum_detalle=(f"Servicio: {servicio}, Costo: {costo_servicio} \n")
+        detalle+=sum_detalle
+
+    nota[folio]=(cliente, fecha, monto_pago, detalle)
+    print(detalle)
+    print(nota)
 
 def consultar_por_periodo(notas):
     fecha_inicial = input("Ingrese la fecha inicial (YYYY-MM-DD): ")
@@ -90,7 +104,6 @@ def menu():
         
         if opcion == "1":
             agregar_nota(notas)
-            folio_actual += 1
         elif opcion == "2":
             print("\n--- Submenú Consultas y Reportes ---")
             print("1. Consulta por período")
