@@ -2,7 +2,13 @@ import datetime
 def agregar_nota(notas):
     nota={}
     folio=max(nota.keys(), default=1000)+1
-    fecha=datetime.datetime.today().date()
+    while True:
+        try:
+            fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa"),"%d/%m/%Y").date()
+            fecha<datetime.datetime.today().date()
+            break
+        except Exception:
+            print("Ingrese una fecha válida")    
     cliente=input("Ingrese el nombre del cliente: ")
     monto_pago=0
     detalle=""
