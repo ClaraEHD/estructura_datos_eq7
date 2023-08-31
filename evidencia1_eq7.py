@@ -39,8 +39,8 @@ def cancelar_nota(notas, notas_canceladas):
             print(f"Nombre del cliente: {nota['nombre']}")
             print(f"Tipo de servicio: {nota['servicio']}")
             print(f"Costo del servicio: {nota['costo']}")
-            confirmacion = input("¿Desea confirmar la cancelación de esta nota? (s/n): ")
-            if confirmacion.lower() == 's':
+            confirmacion = input("¿Desea confirmar la cancelación de esta nota? (si/no): ")
+            if confirmacion.lower() == 'si':
                 nota['cancelada'] = True
                 notas_canceladas.append(nota)
                 print("Nota cancelada con éxito.")
@@ -53,8 +53,8 @@ def recuperar_nota_cancelada(notas_canceladas):
     for nota in notas_canceladas:
         print(f"{nota['folio']}\t{nota['nombre']}")
     
-    folio_recuperar = input("Ingrese el folio de la nota cancelada que desea recuperar (o 'n' para cancelar): ")
-    if folio_recuperar == 'n':
+    folio_recuperar = input("Ingrese el folio de la nota cancelada que desea recuperar (o 'no' para cancelar): ")
+    if folio_recuperar == 'no':
         return None
     
     for nota in notas_canceladas:
@@ -110,8 +110,8 @@ def menu():
                 notas.append(nota_recuperada)
                 print("Nota cancelada recuperada con éxito.")
         elif opcion == "5":
-            confirmacion_salida = input("¿Está seguro de que desea salir? (s/n): ")
-            if confirmacion_salida.lower() == 's':
+            confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
+            if confirmacion_salida.lower() == 'si':
                 print("¡Hasta luego!")
                 break
         else:
