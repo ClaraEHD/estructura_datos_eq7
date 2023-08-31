@@ -4,7 +4,7 @@ def agregar_nota(notas):
     folio=max(nota.keys(), default=1000)+1
     while True:
         try:
-            fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa"),"%d/%m/%Y").date()
+            fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
             fecha<datetime.datetime.today().date()
             break
         except Exception:
@@ -16,14 +16,19 @@ def agregar_nota(notas):
         servicio=input("Ingrese el detalle del servicio realizado: ") #Ingresar más de un servicio
         if servicio.strip()=="":
             break
-        costo_servicio=float(input("Ingrese el costo del servicio: "))
+        while True:
+            try:
+                costo_servicio=float(input("Ingrese el costo del servicio: "))
+                costo_servicio!=0
+                break
+            except Exception:
+                print("Ingrese una cantidad")
         monto_pago+=costo_servicio #suma de los costos del servicio
         sum_detalle=(f"Servicio: {servicio}, Costo: {costo_servicio} \n")
         detalle+=sum_detalle
 
     nota[folio]=(cliente, fecha, monto_pago, detalle)
-    print(detalle)
-    print(nota)
+    print(costo_servicio)
 
 def consultar_por_periodo(notas):
     fecha_inicial = input("Ingrese la fecha inicial (YYYY-MM-DD): ")
