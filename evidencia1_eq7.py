@@ -28,11 +28,10 @@ def agregar_nota(notas):
         detalle+=sum_detalle
 
     nota[folio]=(cliente, fecha, monto_pago, detalle)
-    print(costo_servicio)
 
 def consultar_por_periodo(notas):
-    fecha_inicial = input("Ingrese la fecha inicial (YYYY-MM-DD): ")
-    fecha_final = input("Ingrese la fecha final (YYYY-MM-DD): ")
+    fecha_inicial = input("Ingrese la fecha inicial (dd/mm/aaaa): ")
+    fecha_final = input("Ingrese la fecha final (dd/mm/aaaa): ")
     notas_periodo = [nota for nota in notas if nota['fecha'] >= fecha_inicial and nota['fecha'] <= fecha_final]
     
     if notas_periodo:
