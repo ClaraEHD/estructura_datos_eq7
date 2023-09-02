@@ -30,28 +30,28 @@ def agregar_nota(notas):
     nota[folio]=(cliente, fecha, monto_pago, detalle)
 
 def consultar_por_periodo(notas):
-    fecha_inicial = input("Ingrese la fecha inicial (dd/mm/aaaa): ")
-    fecha_final = input("Ingrese la fecha final (dd/mm/aaaa): ")
-    notas_periodo = [nota for nota in notas if nota['fecha'] >= fecha_inicial and nota['fecha'] <= fecha_final]
+    fecha_inicial =datetime.datetime.strptime(input("Ingrese la fecha inicial dd/mm/aaaa: "),"%d/%m/%Y").date()
+    fecha_final =datetime.datetime.strptime(input("Ingrese la fecha inicial dd/mm/aaaa: "),"%d/%m/%Y").date()
+    notas_periodo = [nota for nota in notas if nota['fecha'] >= fecha_inicial and nota['fecha'] <= fecha_final]     #########
     
-    if notas_periodo:
+    if notas_periodo==True:
         print("\nReporte de notas por período:")
         print("Folio\tNombre\tServicio\tCosto")
         for nota in notas_periodo:
-            print(f"{nota['folio']}\t{nota['nombre']}\t{nota['servicio']}\t{nota['costo']}")
+            print(f"{nota['folio']}\t{nota['nombre']}\t{nota['servicio']}\t{nota['costo']}")    ###########
     else:
         print("No hay notas registradas para el período especificado.")
 
 def consultar_por_folio(notas):
     folio = input("Ingrese el folio de la nota: ")
     for nota in notas:
-        if nota['folio'] == folio and not nota['cancelada']:
+        if nota['folio'] == folio and not nota['cancelada']: #return para nota
             print("\nDetalle de la nota:")
             print(f"Folio: {nota['folio']}")
             print(f"Nombre del cliente: {nota['nombre']}")
             print(f"Tipo de servicio: {nota['servicio']}")
             print(f"Costo del servicio: {nota['costo']}")
-            return
+            return      ##return q
     print("No se encontró una nota válida para el folio ingresado.")
 
 def cancelar_nota(notas, notas_canceladas):
@@ -68,7 +68,7 @@ def cancelar_nota(notas, notas_canceladas):
                 nota['cancelada'] = True
                 notas_canceladas.append(nota)
                 print("Nota cancelada con éxito.")
-            return
+            return   ##return q
     print("No se encontró una nota válida para el folio ingresado.")
 
 def recuperar_nota_cancelada(notas_canceladas):
@@ -89,7 +89,7 @@ def recuperar_nota_cancelada(notas_canceladas):
             print(f"Tipo de servicio: {nota['servicio']}")
             print(f"Costo del servicio: {nota['costo']}")
             confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (s/n): ")
-            if confirmacion.lower() == 's':
+            if confirmacion.lower() == "s":
                 notas_canceladas.remove(nota)
                 return nota
             else:
