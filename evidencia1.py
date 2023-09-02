@@ -24,9 +24,9 @@ nota[folio]=(cliente, fecha, monto_pago, detalle)
 print(detalle)
 print(nota)
 
-
-
     #CONSULTAS Y REPORTES
+
+
 
     #CANCELAR UNA NOTA
 
