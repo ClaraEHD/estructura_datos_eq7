@@ -1,16 +1,23 @@
 import datetime
 
 def consultar_por_periodo(notas):
+    notas_periodo=[]
+#    for nota in notas:
+#       fechas=x['Fecha']
     fecha_inicial =datetime.datetime.strptime(input("Ingrese la fecha inicial dd/mm/aaaa: "),"%d/%m/%Y").date()
     fecha_final =datetime.datetime.strptime(input("Ingrese la fecha final dd/mm/aaaa: "),"%d/%m/%Y").date()
-    notas_periodo = [nota for nota in notas if notas['Fecha']>= fecha_inicial and notas['Fecha'] <= fecha_final]     
-    if notas_periodo==True:
-        print("\nReporte de notas por período:")
-        print("Folio'\tFecha\tNombre\tServicio\tCosto")
-        for nota in notas_periodo:
-            print(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']}")    
+    for nota in notas:
+        if fecha_inicial<=nota['Fecha'] <=fecha_final:
+            info_nota=(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']}") 
+            notas_periodo.append(info_nota)
+    if len(notas_periodo)==0:
+        print("No hay notas registradas para el periodo especificado")
     else:
-        print("No hay notas registradas para el período especificado.")
+        print("Reporte de notas para el periodo especificado: ")
+        print("Folio'\tFecha\tNombre\tCosto")
+        for nota in notas_periodo:
+            print(nota)
+
 
 def consultar_por_folio(notas):
     folio = input("Ingrese el folio de la nota: ")
@@ -69,7 +76,7 @@ def recuperar_nota_cancelada(notas_canceladas):
     return None
 
 
-
+notas=list()
 notas_canceladas = []
 
     
@@ -122,7 +129,11 @@ while True:
         nota["Monto_pago"]=(monto_pago)
         nota["Detalles"]=(detalle)
         nota["Estatus"]=(cancelada)
-        
+        notas.append(nota)
+
+        for x in notas:
+            fechas=x['Fecha']
+
         
     elif opcion == "2":
         print("\n--- Submenú Consultas y Reportes ---")
@@ -130,13 +141,13 @@ while True:
         print("2. Consulta por folio")
         subopcion = input("Seleccione una opción: ")
         if subopcion == "1":
-            consultar_por_periodo(nota)
+            consultar_por_periodo(notas)
         elif subopcion == "2":
-            consultar_por_folio(nota)
+            consultar_por_folio(notas)
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
     elif opcion == "3":
-        cancelar_nota(nota, notas_canceladas)
+        cancelar_nota(notas, notas_canceladas)
     elif opcion == "4":
         nota_recuperada = recuperar_nota_cancelada(notas_canceladas)
         if nota_recuperada:
