@@ -68,9 +68,8 @@ def recuperar_nota_cancelada(notas,notas_canceladas):
             print(f"Tipo de servicio: {nota['servicio']}")
             print(f"Costo del servicio: {nota['costo']}")
             confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (s/n): ")
-            if confirmacion.lower() == "s":
-                del notas_canceladas[nota]
-                notas.append(nota)
+            if confirmacion.lower() == "s" or confirmacion.lower() == "n":
+                print("No pudo proceder la recuperación\nLa nota no fue recuperada")
             else:
                 return None
     print("No se encontró una nota cancelada válida para el folio ingresado.")
