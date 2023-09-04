@@ -55,9 +55,10 @@ def recuperar_nota_cancelada(notas,notas_canceladas):
     print("Folio\tNombre")
     for nota in notas_canceladas:
         print(f"{nota['folio']}\t{nota['Cliente']}\n")
-    
-    folio_recuperar =int(input("Ingrese el folio de la nota cancelada que desea recuperar (o 'no' para cancelar): "))
-    if folio_recuperar == 'no':
+    try
+        folio_recuperar =int(input("Ingrese el folio de la nota cancelada que desea recuperar (o 'no' para cancelar): "))
+    except ValueError:
+        print("\nVolviendo al menu ")
         return None
     
     for nota in notas_canceladas:
