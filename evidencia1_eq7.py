@@ -32,16 +32,14 @@ def consultar_por_folio(notas):
 
 def consultar_por_rfc(notas):
     folio =int(input("Ingrese el RFC de la persona que desea consultar: "))
-    for nota in notas:
-        if nota['Folio'] == folio and nota['Estatus']==False:
-            print("\nDetalle de la nota:\n")
-            print(f"Folio: {nota['Folio']}\n")
-            print(f"Fecha: {nota['Fecha']}\n")
-            print(f"Nombre del cliente: {nota['Cliente']}\n")
-            print(f"Servicio: {nota['Detalles']}\n")
-            print(f"Costo del servicio: {nota['Monto_pago']}")
-        else:
-            print("No se encontró una nota válida para el folio ingresado.")
+    ##listado de notas alfabeticamente con folio
+    ##el cliente indicará el folio que desea consultar
+    ## desplegará información de cada nota expedida al cliente
+        ##du detalle y su monto promedio 
+    ##preguntar si desea exportar en excel 
+    ##nombre del documento de excel deberá ser rfc_fechaemisionreporte
+    ##se le informará la úbicación del documento resultante
+
 
 def cancelar_nota(notas):
     folio = int(input("Ingrese el folio de la nota a cancelar: "))
