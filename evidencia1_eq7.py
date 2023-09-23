@@ -30,6 +30,19 @@ def consultar_por_folio(notas):
         else:
             print("No se encontró una nota válida para el folio ingresado.")
 
+def consultar_por_rfc(notas):
+    folio =int(input("Ingrese el RFC de la persona que desea consultar: "))
+    for nota in notas:
+        if nota['Folio'] == folio and nota['Estatus']==False:
+            print("\nDetalle de la nota:\n")
+            print(f"Folio: {nota['Folio']}\n")
+            print(f"Fecha: {nota['Fecha']}\n")
+            print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"Servicio: {nota['Detalles']}\n")
+            print(f"Costo del servicio: {nota['Monto_pago']}")
+        else:
+            print("No se encontró una nota válida para el folio ingresado.")
+
 def cancelar_nota(notas):
     folio = int(input("Ingrese el folio de la nota a cancelar: "))
     for nota in notas:
@@ -97,8 +110,10 @@ while True:
         while True:
             try:
                 fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
-                if fecha<datetime.datetime.today().date()
-                break
+                if fecha<datetime.datetime.today().date():
+                    break
+                else: 
+                    print("Ingrese una fecha válida")  
             except Exception:
                 print("Ingrese una fecha válida")    
         while True:
@@ -131,7 +146,7 @@ while True:
         nota["Detalles"]=(detalle)
         nota["Estatus"]=(cancelada)
         notas.append(nota)
-        print(f"El folio es: {nota["Folio"]}")
+        print("El folio es:", nota["Folio"])
         for x in notas:
             fechas=x['Fecha']
 
