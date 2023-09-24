@@ -1,5 +1,6 @@
 import datetime
 import pandas as pd
+import re
 
 ##función para exportar a excel
 def exportar_a_excel(datos, nombre_archivo):
@@ -9,21 +10,50 @@ def exportar_a_excel(datos, nombre_archivo):
     # Guardar el DataFrame en un archivo Excel
     df.to_excel(nombre_archivo, index=False)
 
-def consultar_por_periodo(notas):
-    notas_periodo=[]
-    fecha_inicial =datetime.datetime.strptime(input("Ingrese la fecha inicial dd/mm/aaaa: "),"%d/%m/%Y").date()
-    fecha_final =datetime.datetime.strptime(input("Ingrese la fecha final dd/mm/aaaa: "),"%d/%m/%Y").date()
+def validar_rfc(rfc):
+    # Expresion regular para validar el RFC 
+    patron = r'^[A-Z&Ñ]{3,4}\d{6}[A-V1-9][0-9A-Z]([0-9A])?$'
+    
+    # Utiliza re.fullmatch para verificar si la cadena cumple con el patrón
+    return bool(re.fullmatch(patron, rfc))
+
+def consultar_por_periodo(notas): 
+    notas_periodo = []
+    try:
+        fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa (deje en blanco para usar 01/01/2000): ")
+        if fecha_inicial_str.strip() == '':
+            fecha_inicial = datetime.date(2000, 1, 1)
+        else:
+            fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
+        fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa (deje en blanco para usar la fecha actual): ")
+        if fecha_final_str.strip() == "":
+            fecha_final = datetime.datetime.today().date()
+        else:
+            fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
+        if fecha_final < fecha_inicial:
+            print("La fecha final debe ser igual o posterior a la fecha inicial.")
+            return
+   
+    except ValueError:
+        print("Fecha ingresada inválida.")
+        return
+    total_monto = 0
+    count_notas = 0
+
     for nota in notas:
-        if fecha_inicial<=nota['Fecha'] <= fecha_final and nota['Estatus']==False:
-            info_nota=(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']}") 
-            notas_periodo.append(info_nota)
-    if len(notas_periodo)==0:
-        print("No hay notas registradas para el periodo especificado")
+        if fecha_inicial <= nota['Fecha'] <= fecha_final and not nota['Estatus']:
+            total_monto += nota['Monto_pago']
+            count_notas += 1
+            notas_periodo.append(nota)
+    if not notas_periodo:
+        print("No hay notas registradas para el período especificado.")
     else:
-        print("Reporte de notas para el periodo especificado: ")
-        print("Folio'\tFecha\tNombre\tCosto")
+        promedio_monto = total_monto / count_notas if count_notas > 0 else 0
+        print("Reporte de notas para el período especificado: ")
+        print("Folio\tFecha\tNombre\tCosto")
         for nota in notas_periodo:
-            print(nota)
+            print(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']:.2f}")
+        print(f"\nMonto promedio de las notas en el período: {promedio_monto:.2f}")
 
 
 def consultar_por_folio(notas):
@@ -34,6 +64,7 @@ def consultar_por_folio(notas):
             print(f"Folio: {nota['Folio']}\n")
             print(f"Fecha: {nota['Fecha']}\n")
             print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"RFC: {nota['RFC']}\n")
             print(f"Servicio: {nota['Detalles']}\n")
             print(f"Costo del servicio: {nota['Monto_pago']}")
         else:
@@ -54,18 +85,17 @@ def consultar_por_rfc(notas):
             print(f"Folio: {nota['Folio']}\n")
             print(f"Fecha: {nota['Fecha']}\n")
             print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"RFC: {nota['RFC']}\n")
             print(f"Servicio: {nota['Detalles']}\n")
             print(f"Costo del servicio: {nota['Monto_pago']}")
             print(f"Monto promedio: {nota['Promedio_costo']}")
             p_importar=input("¿Desea importar la información a excel? S/N")
             if p_importar.upper=="S":
-                nombre_archivo=nota['RFC']"_"+datetime.datetime.today().date()
+                nombre_archivo=nota['RFC']+"_"+datetime.datetime.today().date()
                 exportar_a_excel(notas, nombre_archivo)
-                print(f'Datos exportados a {nombre_archivo}') ##pendiente ubicación de archivo
-                
+                print(f'Datos exportados a {nombre_archivo}') ##pendiente ubicación de archivo 
         else:
             print("No se encontró una nota válida para el folio ingresado.")
-
 
 def cancelar_nota(notas):
     folio = int(input("Ingrese el folio de la nota a cancelar: "))
@@ -75,6 +105,7 @@ def cancelar_nota(notas):
             print(f"Folio: {nota['Folio']}\n")
             print(f"Fecha: {nota['Fecha']}\n")
             print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"RFC: {nota['RFC']}\n")
             print(f"Tipo de servicio: {nota['Detalles']}\n")
             print(f"Costo del servicio: {nota['Monto_pago']}\n")
             confirmacion = input("¿Desea confirmar la cancelación de esta nota? (si/no): ")
@@ -103,6 +134,7 @@ def recuperar_nota_cancelada(notas_canceladas):
             print("\nDetalle de la nota cancelada a recuperar:")
             print(f"Folio: {nota['Folio']}")
             print(f"Nombre del cliente: {nota['Cliente']}")
+            print(f"RFC: {nota['RFC']}\n")
             print(f"Tipo de servicio: {nota['Detalles']}")
             print(f"Costo del servicio: {nota['Monto_pago']}")
             confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (s/n): ")
@@ -130,7 +162,7 @@ while True:
         
     if opcion == "1":
         nota={}
-        folio_num=max(nota.keys(), default=1000)+1
+        folio_num = len(notas) + 1
         while True:
             try:
                 fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
@@ -138,54 +170,65 @@ while True:
                     break
                 else: 
                     print("Ingrese una fecha válida")  
-            except Exception:
+            except ValueError:
                 print("Ingrese una fecha válida")    
+
         while True:
             cliente=input("Ingrese el nombre del cliente: ")
-            if cliente.strip()=="":
+            if cliente.strip() !="":
+                break
+            else:
                 print("No puede dejar el campo vacío")
-            else:break
-        monto_pago=0
-        detalle=""
+  
         while True:
-            servicio=input("Ingrese el detalle del servicio realizado (dejar vacío para cancelar): ") #Ingresar más de un servicio
+            rfc = input("Por favor, ingrese su RFC: ")
+            if validar_rfc(rfc):
+                break
+            else:
+                print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
+
+            monto_pago = 0
+            detalle = ""
+
+        while True:
+            servicio=input("Ingrese el detalle del servicio realizado (dejar vacío para cancelar): ") #Ingresar mas de un servicio
             if servicio.strip()=="":
                 break
             while True:
                 try:
                     costo_servicio=float(input("Ingrese el costo del servicio: "))
-                    costo_servicio!=0
-                    break
-                except Exception:
-                    print("Ingrese una cantidad")
-            monto_pago+=costo_servicio #suma de los costos del servicio
-            sum_detalle=(f"Servicio: {servicio}, Costo: {costo_servicio} \n")
-            detalle+=sum_detalle
-            promedio=monto_pago/len
-            cancelada=False
+                    if costo_servicio!=0:
+                        break
+                except ValueError:
+                    print("Ingrese una cantidad valida. ")
 
-        nota["Folio"]=(folio_num)
-        nota["Fecha"]=(fecha)
-        nota["Cliente"]=(cliente)
-        nota["Monto_pago"]=(monto_pago)
-        nota["Detalles"]=(detalle)
-        nota["Estatus"]=(cancelada)
-        nota["Promedio_costo"]=(promedio)
+            monto_pago+=costo_servicio #suma de los costos del servicio
+            sum_detalle=f"Servicio: {servicio}, Costo: {costo_servicio} \n"
+            detalle+=sum_detalle
+
+        nota["Folio"] = folio_num
+        nota["Fecha"] = fecha
+        nota["Cliente"] = cliente
+        nota["RFC"] = rfc 
+        nota["Monto_pago"] = monto_pago
+        nota["Detalles"] = detalle
+        nota["Estatus"] = False
         notas.append(nota)
-        print("El folio es:", nota["Folio"])
-        for x in notas:
-            fechas=x['Fecha']
+        print(f"El folio es: {nota['Folio']}")
 
         
     elif opcion == "2":
         print("\n--- Submenú Consultas y Reportes ---")
         print("1. Consulta por período")
         print("2. Consulta por folio")
+        print("3. Consulta por cliente")
         subopcion = input("Seleccione una opción: ")
         if subopcion == "1":
             consultar_por_periodo(notas)
         elif subopcion == "2":
             consultar_por_folio(notas)
+        elif subopcion == "3":
+            consultar_por_rfc(notas)
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
     elif opcion == "3":
