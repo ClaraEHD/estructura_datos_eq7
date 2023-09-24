@@ -21,6 +21,17 @@ def validar_rfc(rfc):
 
 archivo_csv = "datos.csv"
 
+#Funcion para validar correo electronico
+def validar_correo(correoelectronico):
+    Filtro = r'^[\w\.]+@[\w\.]+$'    
+    # Validar el correo
+    if re.match(Filtro, correoelectronico):
+        print("El correo electrónico es válido.")
+        return True 
+    else:
+        print("ERROR. El dato ingresado no es valido. Vuelva a intentarlo")
+        return False 
+        
 def comprobar_existencia_archivo():
     return os.path.exists(archivo_csv)
 
@@ -210,10 +221,18 @@ while True:
                 break
             else:
                 print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
-
+        
             monto_pago = 0
             detalle = ""
-
+        
+        while True:
+            # Pedir al usuario que ingrese un correo
+            correoelectronico = input("Ingresa un correo electrónico: ")
+            if (correoelectronico.strip()==""):
+                print("El correo no puede ser omitido")
+            elif (validar_correo(correoelectronico)):
+                break 
+        
         while True:
             servicio=input("Ingrese el detalle del servicio realizado (dejar vacío para cancelar): ") #Ingresar mas de un servicio
             if servicio.strip()=="":
