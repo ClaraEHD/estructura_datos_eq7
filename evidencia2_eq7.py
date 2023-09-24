@@ -1,4 +1,13 @@
 import datetime
+import pandas as pd
+
+##función para exportar a excel
+def exportar_a_excel(datos, nombre_archivo):
+    # Crear un DataFrame a partir de la lista de diccionarios
+    df = pd.DataFrame(datos)
+    
+    # Guardar el DataFrame en un archivo Excel
+    df.to_excel(nombre_archivo, index=False)
 
 def consultar_por_periodo(notas):
     notas_periodo=[]
@@ -50,11 +59,12 @@ def consultar_por_rfc(notas):
             print(f"Monto promedio: {nota['Promedio_costo']}")
             p_importar=input("¿Desea importar la información a excel? S/N")
             if p_importar.upper=="S":
-                break ##aquí se importa a excel
+                nombre_archivo=nota['RFC']"_"+datetime.datetime.today().date()
+                exportar_a_excel(notas, nombre_archivo)
+                print(f'Datos exportados a {nombre_archivo}') ##pendiente ubicación de archivo
+                
         else:
             print("No se encontró una nota válida para el folio ingresado.")
-    ##nombre del documento de excel deberá ser rfc_fechaemisionreporte
-    ##se le informará la úbicación del documento resultante
 
 
 def cancelar_nota(notas):
