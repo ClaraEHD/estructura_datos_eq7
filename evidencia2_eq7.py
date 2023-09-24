@@ -1,6 +1,8 @@
 import datetime
 import pandas as pd
 import re
+import os
+import csv
 
 ##función para exportar a excel
 def exportar_a_excel(datos, nombre_archivo):
@@ -16,6 +18,20 @@ def validar_rfc(rfc):
     
     # Utiliza re.fullmatch para verificar si la cadena cumple con el patrón
     return bool(re.fullmatch(patron, rfc))
+
+archivo_csv = "datos.csv"
+
+def comprobar_existencia_archivo():
+    return os.path.exists(archivo_csv)
+
+def  leer_datos_desde_csv():
+    datos = []
+    with open(archivo_csv, 'r', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        for fila in reader:
+            datos.append(fila)
+    return datos
+
 
 def consultar_por_periodo(notas): 
     notas_periodo = []
@@ -149,6 +165,14 @@ def recuperar_nota_cancelada(notas_canceladas):
 notas=list()
 notas_canceladas=list()
 
+# Comprobar la existencia del archivo CSV
+if comprobar_existencia_archivo():
+    datos_recuperados = leer_datos_desde_csv()
+    print("Se ha recuperado el estado de la aplicación a partir del archivo CSV.")
+    print("Datos recuperados:", datos_recuperados)
+else:
+    print("No se ha encontrado un archivo CSV existente.")
+    print("Se parte de un estado inicial vacío.")
     
 while True:
     print("\n--- Menú Taller Mecánico ---")
