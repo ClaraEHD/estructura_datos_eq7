@@ -30,13 +30,29 @@ def consultar_por_folio(notas):
         else:
             print("No se encontró una nota válida para el folio ingresado.")
 
+##función para ordenar rfc 
+def RFC_ORDENADO(RFC):
+    return RFC['RFC']
 def consultar_por_rfc(notas):
+    rfc_ordenado=sorted(notas, key=RFC_ORDENADO)
+    for nota in rfc_ordenado:
+        print("RFC del cliente: ", nota['RFC'], "   Folio: ", nota['Folio'])
+
     folio =int(input("Ingrese el RFC de la persona que desea consultar: "))
-    ##listado de notas alfabeticamente con folio
-    ##el cliente indicará el folio que desea consultar
-    ## desplegará información de cada nota expedida al cliente
-        ##du detalle y su monto promedio 
-    ##preguntar si desea exportar en excel 
+    for nota in notas:
+        if nota['Folio'] == folio and nota['Estatus']==False:
+            print("\nDetalle de la nota:\n")
+            print(f"Folio: {nota['Folio']}\n")
+            print(f"Fecha: {nota['Fecha']}\n")
+            print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"Servicio: {nota['Detalles']}\n")
+            print(f"Costo del servicio: {nota['Monto_pago']}")
+            print(f"Monto promedio: {nota['Promedio_costo']}")
+            p_importar=input("¿Desea importar la información a excel? S/N")
+            if p_importar.upper=="S":
+                break ##aquí se importa a excel
+        else:
+            print("No se encontró una nota válida para el folio ingresado.")
     ##nombre del documento de excel deberá ser rfc_fechaemisionreporte
     ##se le informará la úbicación del documento resultante
 
@@ -135,6 +151,7 @@ while True:
             monto_pago+=costo_servicio #suma de los costos del servicio
             sum_detalle=(f"Servicio: {servicio}, Costo: {costo_servicio} \n")
             detalle+=sum_detalle
+            promedio=monto_pago/len
             cancelada=False
 
         nota["Folio"]=(folio_num)
@@ -143,6 +160,7 @@ while True:
         nota["Monto_pago"]=(monto_pago)
         nota["Detalles"]=(detalle)
         nota["Estatus"]=(cancelada)
+        nota["Promedio_costo"]=(promedio)
         notas.append(nota)
         print("El folio es:", nota["Folio"])
         for x in notas:
