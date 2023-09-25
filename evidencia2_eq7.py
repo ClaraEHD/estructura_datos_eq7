@@ -154,12 +154,21 @@ def validar_correo(correoelectronico):
         return False 
 
 def guardar_datos_csv(notas):
-    archivo=open("Datos_taller_mécanico.csv", "w", newline="")
-    grabador=csv.writer(archivo)
-    grabador.writerow(("Folio","Fecha","Nombre del cliente","RFC","Monto de pago total","Detalle","Costo promedio de servicio","Estatus"))
-    for nota in notas:
-        grabador.writerows(nota)
-    print("Datos guardados en: ", "Datos_taller_mécanico.csv")
+    nombre_archivo="Datos_taller_mécanico.cvs"
+    with open(nombre_archivo, 'w', newline='') as csvfile:
+        # Define los nombres de las columnas (campos del diccionario)
+        columnas = notas[0].keys()
+        
+        # Crea un escritor CSV
+        writer = csv.DictWriter(csvfile, fieldnames=columnas)
+        
+        # Escribe los encabezados
+        writer.writeheader()
+        
+        # Escribe los datos
+        for diccionario in notas:
+            writer.writerow(diccionario)
+
 
 
 def comprobar_existencia_archivo():
@@ -246,8 +255,8 @@ def consultar_por_rfc(notas):
             print(f"Servicio: \n {nota['Detalles']}\n")
             print(f"Costo del servicio: {nota['Monto_pago']}")
             print(f"Monto promedio: {nota['Promedio_monto']}")
-            p_importar=input("¿Desea importar la información a excel? S/N ")
-            if p_importar.upper=="S":
+            p_importar=input("¿Desea importar la información a excel? SI/NO ")
+            if p_importar.upper=="SI":
                 nombre_archivo=nota['RFC']+"_"+datetime.datetime.today().date().strftime
                 exportar_a_excel(notas, nombre_archivo)
                 print(f'Datos exportados a {nombre_archivo}') ##pendiente ubicación de archivo
