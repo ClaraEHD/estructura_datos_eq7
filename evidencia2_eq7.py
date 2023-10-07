@@ -140,7 +140,7 @@ def validar_rfc(rfc):
     # Utiliza re.fullmatch para verificar si la cadena cumple con el patrón
     return bool(re.fullmatch(patron, rfc))
 
-archivo_csv = "Datos_taller_mécanico.csv"
+archivo_csv = "Datos_taller_mecanico.csv"
 
 #Funcion para validar correo electronico
 def validar_correo(correoelectronico):
@@ -154,22 +154,18 @@ def validar_correo(correoelectronico):
         return False 
 
 def guardar_datos_csv(notas):
-    nombre_archivo="Datos_taller_mécanico.cvs"
-    with open(nombre_archivo, 'w', newline='') as csvfile:
-        # Define los nombres de las columnas (campos del diccionario)
-        columnas = notas[0].keys()
-        
-        # Crea un escritor CSV
-        writer = csv.DictWriter(csvfile, fieldnames=columnas)
-        
-        # Escribe los encabezados
+    # Define los nombres de las columnas (campos del diccionario)
+    columnas = notas[0].keys()
+# Abrir el archivo CSV en modo escritura
+    with open(archivo_csv, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=columnas)
+    
+    # Escribe los nombres de las columnas
         writer.writeheader()
-        
-        # Escribe los datos
+    
+    # Escribe cada diccionario en el archivo
         for diccionario in notas:
             writer.writerow(diccionario)
-
-
 
 def comprobar_existencia_archivo():
     return os.path.exists(archivo_csv)
@@ -220,6 +216,7 @@ def consultar_por_periodo(notas):
         for nota in notas_periodo:
             print(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']:.2f}")
         print(f"\nMonto promedio de las notas en el período: {promedio_monto:.2f}")
+    sub_menu_consultas(notas, notas_canceladas)    
 
 
 def consultar_por_folio(notas):
@@ -235,6 +232,8 @@ def consultar_por_folio(notas):
             print(f"Costo del servicio: {nota['Monto_pago']}")
         else:
             print("No se encontró una nota válida para el folio ingresado.")
+    sub_menu_consultas(notas, notas_canceladas)    
+        
 
 ##función para ordenar rfc 
 def RFC_ORDENADO(RFC):
@@ -256,10 +255,13 @@ def consultar_por_rfc(notas):
             print(f"Costo del servicio: {nota['Monto_pago']}")
             print(f"Monto promedio: {nota['Promedio_monto']}")
             p_importar=input("¿Desea importar la información a excel? SI/NO ")
-            if p_importar.upper=="SI":
-                nombre_archivo=nota['RFC']+"_"+datetime.datetime.today().date().strftime
+            if p_importar.strip().upper()=="SI":
+                rfcnota=nota['RFC']
+                fecha_str = datetime.datetime.today().date().strftime('%d-%m-%Y')
+                nombre_archivo=f"{rfcnota}_{fecha_str}.xlsx"
+                print(type(nombre_archivo))
                 exportar_a_excel(notas, nombre_archivo)
-                print(f'Datos exportados a {nombre_archivo}') ##pendiente ubicación de archivo
+                print(f'Datos exportados a {os.path.abspath(nombre_archivo)}') ##pendiente ubicación de archivo
             else:
                 print("Regresando al menu de consultas")
                 sub_menu_consultas(notas, notas_canceladas) 
@@ -283,12 +285,9 @@ def cancelar_nota(notas):
                 print("Nota cancelada con éxito.")
                 return nota
             print("\nVolviendo al menu ")
-            sub_menu_consultas(notas, notas_canceladas)
-
         else:
             print("No se encontró una nota válida para el folio ingresado.")
             print("\nVolviendo al menu ")
-            sub_menu_consultas(notas, notas_canceladas)
 
 
 def recuperar_nota_cancelada(notas_canceladas):
