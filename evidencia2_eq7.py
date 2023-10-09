@@ -89,13 +89,9 @@ def menu_principal(notas, notas_canceladas):
             sub_menu_consultas(notas, notas_canceladas)
 
         elif opcion == "3":
-            nota_cancelar=cancelar_nota(notas)
-            notas_canceladas.append(nota_cancelar)
+            cancelar_nota(notas,notas_canceladas)
         elif opcion == "4":
-            nota_recuperada = recuperar_nota_cancelada(notas_canceladas)
-            if nota_recuperada:
-                notas.append(nota_recuperada)
-                print("Nota cancelada recuperada con éxito.")
+            recuperar_nota_cancelada(notas,notas_canceladas)
         elif opcion == "5":
             confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
             if confirmacion_salida.lower() == 'si':
@@ -172,11 +168,28 @@ def comprobar_existencia_archivo():
 
 def  leer_datos_desde_csv():
     notas = []
-    with open(archivo_csv, 'r', newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        for fila in reader:
-            notas.append(fila)
-    return notas
+    notas_canceladas=[]
+    with open(archivo_csv, 'r', newline='') as archivo:
+        lector = csv.reader(archivo)
+        next(lector)
+        for Folio, Fecha, Cliente, RFC, Correo, Monto_pago, Detalles, Estatus, Promedio_monto in lector:
+            nota=dict()
+            nota['Folio']=int(Folio)
+            nota['Fecha']=datetime.datetime.strptime(Fecha, '%Y-%m-%d').date()
+            nota['Cliente']=Cliente
+            nota['RFC']=RFC
+            nota['Correo']=Correo
+            nota['Monto_pago']=float(Monto_pago)
+            nota['Detalles']=Detalles
+            nota['Estatus']=Estatus
+            nota['Promedio_monto']=float(Promedio_monto)
+            if nota['Estatus']=='False':
+                nota['Estatus']=False
+                notas.append(nota)
+            elif nota['Estatus']=='True':
+                nota['Estatus']==True
+                notas_canceladas.append(nota)
+    return notas, notas_canceladas
 
 
 def consultar_por_periodo(notas): 
@@ -184,7 +197,8 @@ def consultar_por_periodo(notas):
     try:
         fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa (deje en blanco para usar 01/01/2000): ")
         if fecha_inicial_str.strip() == '':
-            fecha_inicial = datetime.date(2000, 1, 1)
+            f_i=('1/1/2000')
+            fecha_inicial = datetime.datetime.strptime(f_i, "%d/%m/%Y").date()
         else:
             fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
         fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa (deje en blanco para usar la fecha actual): ")
@@ -221,7 +235,8 @@ def consultar_por_periodo(notas):
 
 def consultar_por_folio(notas):
     folio =int(input("Ingrese el folio de la nota: "))
-    for nota in notas:
+    nota_encontrada=False
+    for nota in notas:    
         if nota['Folio'] == folio and nota['Estatus']==False:
             print("\nDetalle de la nota:\n")
             print(f"Folio: {nota['Folio']}\n")
@@ -230,20 +245,24 @@ def consultar_por_folio(notas):
             print(f"RFC: {nota['RFC']}\n")
             print(f"Servicio: {nota['Detalles']}\n")
             print(f"Costo del servicio: {nota['Monto_pago']}")
-        else:
-            print("No se encontró una nota válida para el folio ingresado.")
+            nota_encontrada=True
+            break
+    if not nota_encontrada:
+        print("No se encontró una nota válida para el folio ingresado.")
     sub_menu_consultas(notas, notas_canceladas)    
         
 
 ##función para ordenar rfc 
 def RFC_ORDENADO(RFC):
     return RFC['RFC']
+#función para consultar por cliente
 def consultar_por_rfc(notas):
     rfc_ordenado=sorted(notas, key=RFC_ORDENADO)
     for nota in rfc_ordenado:
         print("RFC del cliente: ", nota['RFC'], "   Folio: ", nota['Folio'])
 
     folio =int(input("Ingrese el folio de la persona que desea consultar: "))
+    folio_encontrado=False
     for nota in notas:
         if nota['Folio'] == folio and nota['Estatus']==False:
             print("\nDetalle de la nota:\n")
@@ -255,6 +274,7 @@ def consultar_por_rfc(notas):
             print(f"Costo del servicio: {nota['Monto_pago']}")
             print(f"Monto promedio: {nota['Promedio_monto']}")
             p_importar=input("¿Desea importar la información a excel? SI/NO ")
+            folio_encontrado=True
             if p_importar.strip().upper()=="SI":
                 rfcnota=nota['RFC']
                 fecha_str = datetime.datetime.today().date().strftime('%d-%m-%Y')
@@ -265,11 +285,13 @@ def consultar_por_rfc(notas):
             else:
                 print("Regresando al menu de consultas")
                 sub_menu_consultas(notas, notas_canceladas) 
-        else:
+    if not folio_encontrado:
             print("No se encontró una nota válida para el folio ingresado.")
 
-def cancelar_nota(notas):
+#función para cancelar notas
+def cancelar_nota(notas,notas_canceladas):
     folio = int(input("Ingrese el folio de la nota a cancelar: "))
+    nota_encontrada=False
     for nota in notas:
         if nota['Folio'] == folio and nota['Estatus']==False:
             print("\nDetalle de la nota a cancelar:\n")
@@ -283,25 +305,26 @@ def cancelar_nota(notas):
             if confirmacion.lower() == 'si':
                 nota['Estatus'] = True
                 print("Nota cancelada con éxito.")
-                return nota
+                notas_canceladas.append(nota)
+                notas.remove(nota)
+                nota_encontrada=True
+                return notas, notas_canceladas
             print("\nVolviendo al menu ")
-        else:
-            print("No se encontró una nota válida para el folio ingresado.")
-            print("\nVolviendo al menu ")
+    if not nota_encontrada:
+        print("No se encontró una nota válida para el folio ingresado.")
+        print("\nVolviendo al menu ")
 
-
-def recuperar_nota_cancelada(notas_canceladas):
+#función para recuperar una nota cancelada
+def recuperar_nota_cancelada(notas, notas_canceladas):
     print("\nNotas canceladas disponibles:")
     print("Folio\tNombre")
     for nota in notas_canceladas:
         print(f"{nota['Folio']}\t{nota['Cliente']}\n")
     try:
         folio_recuperar =int(input("Ingrese el folio de la nota cancelada que desea recuperar (o 'no' para cancelar): "))
-        
     except ValueError:
         print("\nVolviendo al menu ")
         return None
-        
     
     for nota in notas_canceladas:
         if nota['Folio'] == folio_recuperar:
@@ -311,10 +334,13 @@ def recuperar_nota_cancelada(notas_canceladas):
             print(f"RFC: {nota['RFC']}\n")
             print(f"Tipo de servicio: {nota['Detalles']}")
             print(f"Costo del servicio: {nota['Monto_pago']}")
-            confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (s/n): ")
-            if confirmacion.lower() == "s":
+            confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (SI/NO): ")
+            if confirmacion.lower() == "si":
                 print("La nota fue recuperada con éxito")
-                return nota
+                nota['Estatus']=False
+                notas.append(nota)
+                notas_canceladas.remove(nota)
+                return notas, notas_canceladas
             else:
                 return None
             
@@ -328,9 +354,12 @@ notas_canceladas=list()
 
 # Comprobar la existencia del archivo CSV
 if comprobar_existencia_archivo():
-    datos_recuperados = leer_datos_desde_csv()
+    notas, notas_canceladas = leer_datos_desde_csv()
     print("Se ha recuperado el estado de la aplicación a partir del archivo CSV.")
-    print("Datos recuperados:", datos_recuperados)
+    print("Datos recuperados:")
+    print("Notas vigentes: \n ", notas)
+    print("Notas canceladas: \n ", notas_canceladas)
+    print(type(notas))
 else:
     print("No se ha encontrado un archivo CSV existente.")
     print("Se parte de un estado inicial vacío.")
