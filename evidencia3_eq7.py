@@ -130,3 +130,10 @@ def exportar_a_excel(datos, nombre_archivo):
     # Guardar el DataFrame en un archivo Excel
     
     df.to_excel(nombre_archivo, index=False)
+
+def validar_rfc(rfc):
+    # Expresion regular para validar el RFC 
+    patron = r'^[A-Z&Ñ]{3,4}\d{6}[A-V1-9][0-9A-Z]([0-9A])?$'
+    
+    # Utiliza re.fullmatch para verificar si la cadena cumple con el patrón
+    return bool(re.fullmatch(patron, rfc))
