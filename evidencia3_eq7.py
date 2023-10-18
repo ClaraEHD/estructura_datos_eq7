@@ -83,3 +83,20 @@ def menu_principal(notas, notas_canceladas):
             nota["Promedio_monto"]=promedio_monto
             notas.append(nota)
             print(f"El folio es: {nota['Folio']}")
+
+
+lif opcion == "2":
+            sub_menu_consultas(notas, notas_canceladas)
+
+        elif opcion == "3":
+            cancelar_nota(notas,notas_canceladas)
+        elif opcion == "4":
+            recuperar_nota_cancelada(notas,notas_canceladas)
+        elif opcion == "5":
+            confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
+            if confirmacion_salida.lower() == 'si':
+                print("¡Hasta luego!")
+                guardar_datos_csv(notas)
+                break
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
