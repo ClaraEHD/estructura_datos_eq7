@@ -139,3 +139,15 @@ def validar_rfc(rfc):
     return bool(re.fullmatch(patron, rfc))
 
 archivo_csv = "Datos_taller_mecanico.csv"
+
+
+#Funcion para validar correo electronico
+def validar_correo(correoelectronico):
+    Filtro = r'^[\w\.]+@[\w\.]+$'    
+    # Validar el correo
+    if re.match(Filtro, correoelectronico):
+        print("El correo electrónico es válido.")
+        return True 
+    else:
+        print("ERROR. El dato ingresado no es valido. Vuelva a intentarlo")
+        return False
