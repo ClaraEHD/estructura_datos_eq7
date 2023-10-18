@@ -85,7 +85,7 @@ def menu_principal(notas, notas_canceladas):
             print(f"El folio es: {nota['Folio']}")
 
 
-lif opcion == "2":
+        elif opcion == "2":
             sub_menu_consultas(notas, notas_canceladas)
 
         elif opcion == "3":
