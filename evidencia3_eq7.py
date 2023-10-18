@@ -137,3 +137,5 @@ def validar_rfc(rfc):
     
     # Utiliza re.fullmatch para verificar si la cadena cumple con el patrón
     return bool(re.fullmatch(patron, rfc))
+
+archivo_csv = "Datos_taller_mecanico.csv"
