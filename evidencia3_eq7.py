@@ -100,3 +100,22 @@ def menu_principal(notas, notas_canceladas):
                 break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
+
+
+def sub_menu_consultas(notas, notas_canceladas):
+            print("\n--- Submenú Consultas y Reportes ---")
+            print("1. Consulta por período")
+            print("2. Consulta por folio")
+            print("3. Consulta por cliente")
+            print("4. Regresa al menú principal")
+            subopcion = input("Seleccione una opción: ")
+            if subopcion == "1":
+                consultar_por_periodo(notas)
+            elif subopcion == "2":
+                consultar_por_folio(notas)
+            elif subopcion == "3":
+                consultar_por_rfc(notas)
+            elif subopcion=="4":
+                menu_principal(notas, notas_canceladas)
+            else:
+                print("Opción inválida. Por favor, elija una opción válida.")
