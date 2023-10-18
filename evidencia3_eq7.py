@@ -119,3 +119,14 @@ def sub_menu_consultas(notas, notas_canceladas):
                 menu_principal(notas, notas_canceladas)
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
+
+##función para exportar a excel
+
+def exportar_a_excel(datos, nombre_archivo):
+    # Crear un DataFrame a partir de la lista de diccionarios
+    
+    df = pd.DataFrame(datos)
+    
+    # Guardar el DataFrame en un archivo Excel
+    
+    df.to_excel(nombre_archivo, index=False)
