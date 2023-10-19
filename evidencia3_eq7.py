@@ -210,6 +210,22 @@ def consultar_por_periodo(notas):
             fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
         if fecha_final < fecha_inicial:
             print("La fecha final debe ser igual o posterior a la fecha inicial.")
-            return
+            return        
+        
+    except ValueError:
+        print("Fecha ingresada inválida.")
+        return
+    total_monto = 0
+    count_notas = 0
+
+
+
+
+
+
+
+
+
+
 
 
