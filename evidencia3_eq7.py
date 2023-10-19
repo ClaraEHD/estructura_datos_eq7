@@ -151,3 +151,17 @@ def validar_correo(correoelectronico):
     else:
         print("ERROR. El dato ingresado no es valido. Vuelva a intentarlo")
         return False
+
+def guardar_datos_csv(notas):
+    # Define los nombres de las columnas (campos del diccionario)
+    columnas = notas[0].keys()
+# Abrir el archivo CSV en modo escritura
+    with open(archivo_csv, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=columnas)
+    
+    # Escribe los nombres de las columnas
+        writer.writeheader()
+    
+    # Escribe cada diccionario en el archivo
+        for diccionario in notas:
+            writer.writerow(diccionario)
