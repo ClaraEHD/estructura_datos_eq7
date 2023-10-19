@@ -165,3 +165,6 @@ def guardar_datos_csv(notas):
     # Escribe cada diccionario en el archivo
         for diccionario in notas:
             writer.writerow(diccionario)
+
+def comprobar_existencia_archivo():
+    return os.path.exists(archivo_csv)
