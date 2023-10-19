@@ -218,7 +218,11 @@ def consultar_por_periodo(notas):
     total_monto = 0
     count_notas = 0
 
-
+    for nota in notas:
+        if fecha_inicial <= nota['Fecha'] <= fecha_final and not nota['Estatus']:
+            total_monto += nota['Monto_pago']
+            count_notas += 1
+            notas_periodo.append(nota)
 
 
 
