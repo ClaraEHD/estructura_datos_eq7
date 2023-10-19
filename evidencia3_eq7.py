@@ -223,7 +223,16 @@ def consultar_por_periodo(notas):
             total_monto += nota['Monto_pago']
             count_notas += 1
             notas_periodo.append(nota)
-
+        if not notas_periodo:
+            print("No hay notas registradas para el período especificado.")
+    else:
+        promedio_monto = total_monto / count_notas if count_notas > 0 else 0
+        print("Reporte de notas para el período especificado: ")
+        print("Folio\tFecha\tNombre\tCosto")
+        for nota in notas_periodo:
+            print(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']:.2f}")
+        print(f"\nMonto promedio de las notas en el período: {promedio_monto:.2f}")
+    sub_menu_consultas(notas, notas_canceladas)
 
 
 
