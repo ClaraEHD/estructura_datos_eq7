@@ -172,4 +172,24 @@ def comprobar_existencia_archivo():
 def leer_datos_desde_csv():
     notas = []
     notas_canceladas=[]
-    with open(archivo_csv, 'r', newline='') as archivo:
+    with open(archivo_csv, 'r', newline='') as archivo:
+        lector = csv.reader(archivo)
+        next(lector)
+        for Folio, Fecha, Cliente, RFC, Correo, Monto_pago, Detalles, Estatus, Promedio_monto in lector:
+            nota=dict()
+            nota['Folio']=int(Folio)
+            nota['Fecha']=datetime.datetime.strptime(Fecha, '%Y-%m-%d').date()
+            nota['Cliente']=Cliente
+            nota['RFC']=RFC
+            nota['Correo']=Correo
+            nota['Monto_pago']=float(Monto_pago)
+            nota['Detalles']=Detalles
+            nota['Estatus']=Estatus
+            nota['Promedio_monto']=float(Promedio_monto)
+            if nota['Estatus']=='False':
+                nota['Estatus']=False
+                notas.append(nota)
+            elif nota['Estatus']=='True':
+                nota['Estatus']==True
+                notas_canceladas.append(nota)
+    return notas, notas_canceladas
