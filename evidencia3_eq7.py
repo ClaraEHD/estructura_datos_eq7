@@ -234,6 +234,23 @@ def consultar_por_periodo(notas):
         print(f"\nMonto promedio de las notas en el período: {promedio_monto:.2f}")
     sub_menu_consultas(notas, notas_canceladas)
 
+def consultar_por_folio(notas):
+    folio =int(input("Ingrese el folio de la nota: "))
+    nota_encontrada=False
+    for nota in notas:    
+        if nota['Folio'] == folio and nota['Estatus']==False:
+            print("\nDetalle de la nota:\n")
+            print(f"Folio: {nota['Folio']}\n")
+            print(f"Fecha: {nota['Fecha']}\n")
+            print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"RFC: {nota['RFC']}\n")
+            print(f"Servicio: {nota['Detalles']}\n")
+            print(f"Costo del servicio: {nota['Monto_pago']}")
+            nota_encontrada=True
+            break
+    if not nota_encontrada:
+        print("No se encontró una nota válida para el folio ingresado.")
+    sub_menu_consultas(notas, notas_canceladas)
 
 
 
