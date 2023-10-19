@@ -193,3 +193,23 @@ def leer_datos_desde_csv():
                 nota['Estatus']==True
                 notas_canceladas.append(nota)
     return notas, notas_canceladas
+
+def consultar_por_periodo(notas): 
+    notas_periodo = []
+    try:
+        fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa (deje en blanco para usar 01/01/2000): ")
+        if fecha_inicial_str.strip() == '':
+            f_i=('1/1/2000')
+            fecha_inicial = datetime.datetime.strptime(f_i, "%d/%m/%Y").date()
+        else:
+            fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
+        fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa (deje en blanco para usar la fecha actual): ")
+        if fecha_final_str.strip() == "":
+            fecha_final = datetime.datetime.today().date()
+        else:
+            fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
+        if fecha_final < fecha_inicial:
+            print("La fecha final debe ser igual o posterior a la fecha inicial.")
+            return
+
+
