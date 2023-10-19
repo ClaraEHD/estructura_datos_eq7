@@ -168,3 +168,8 @@ def guardar_datos_csv(notas):
 
 def comprobar_existencia_archivo():
     return os.path.exists(archivo_csv)
+
+def leer_datos_desde_csv():
+    notas = []
+    notas_canceladas=[]
+    with open(archivo_csv, 'r', newline='') as archivo:
