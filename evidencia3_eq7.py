@@ -288,5 +288,80 @@ def consultar_por_rfc(notas):
     if not folio_encontrado:
             print("No se encontró una nota válida para el folio ingresado.")
 
+#función para cancelar notas
+def cancelar_nota(notas,notas_canceladas):
+    folio = int(input("Ingrese el folio de la nota a cancelar: "))
+    nota_encontrada=False
+    for nota in notas:
+        if nota['Folio'] == folio and nota['Estatus']==False:
+            print("\nDetalle de la nota a cancelar:\n")
+            print(f"Folio: {nota['Folio']}\n")
+            print(f"Fecha: {nota['Fecha']}\n")
+            print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"RFC: {nota['RFC']}\n")
+            print(f"Tipo de servicio: {nota['Detalles']}\n")
+            print(f"Costo del servicio: {nota['Monto_pago']}\n")
+            confirmacion = input("¿Desea confirmar la cancelación de esta nota? (si/no): ")
+            if confirmacion.lower() == 'si':
+                nota['Estatus'] = True
+                print("Nota cancelada con éxito.")
+                notas_canceladas.append(nota)
+                notas.remove(nota)
+                nota_encontrada=True
+                return notas, notas_canceladas
+            print("\nVolviendo al menu ")
+    if not nota_encontrada:
+        print("No se encontró una nota válida para el folio ingresado.")
+        print("\nVolviendo al menu ")
+
+#función para recuperar una nota cancelada
+def recuperar_nota_cancelada(notas, notas_canceladas):
+    print("\nNotas canceladas disponibles:")
+    print("Folio\tNombre")
+    for nota in notas_canceladas:
+        print(f"{nota['Folio']}\t{nota['Cliente']}\n")
+    try:
+        folio_recuperar =int(input("Ingrese el folio de la nota cancelada que desea recuperar (o 'no' para cancelar): "))
+    except ValueError:
+        print("\nVolviendo al menu ")
+        return None
+    
+    for nota in notas_canceladas:
+        if nota['Folio'] == folio_recuperar:
+            print("\nDetalle de la nota cancelada a recuperar:")
+            print(f"Folio: {nota['Folio']}")
+            print(f"Nombre del cliente: {nota['Cliente']}")
+            print(f"RFC: {nota['RFC']}\n")
+            print(f"Tipo de servicio: {nota['Detalles']}")
+            print(f"Costo del servicio: {nota['Monto_pago']}")
+            confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (SI/NO): ")
+            if confirmacion.lower() == "si":
+                print("La nota fue recuperada con éxito")
+                nota['Estatus']=False
+                notas.append(nota)
+                notas_canceladas.remove(nota)
+                return notas, notas_canceladas
+            else:
+                return None
+            
+    print("No se encontró una nota cancelada válida para el folio ingresado.")
+    print("\nVolviendo al menu ")
+    return None
 
 
+notas=list()
+notas_canceladas=list()
+
+# Comprobar la existencia del archivo CSV
+if comprobar_existencia_archivo():
+    notas, notas_canceladas = leer_datos_desde_csv()
+    print("Se ha recuperado el estado de la aplicación a partir del archivo CSV.")
+    print("Datos recuperados:")
+    print("Notas vigentes: \n ", notas)
+    print("Notas canceladas: \n ", notas_canceladas)
+    print(type(notas))
+else:
+    print("No se ha encontrado un  CSV existente.")
+    print("Se parte de un estado inicial vacío.")
+    
+menu_principal(notas, notas_canceladas)
