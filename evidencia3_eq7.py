@@ -255,7 +255,11 @@ def consultar_por_folio(notas):
 ##función para ordenar rfc 
 def RFC_ORDENADO(RFC):
     return RFC['RFC']
-
+#función para consultar por cliente
+def consultar_por_rfc(notas):
+    rfc_ordenado=sorted(notas, key=RFC_ORDENADO)
+    for nota in rfc_ordenado:
+        print("RFC del cliente: ", nota['RFC'], "   Folio: ", nota['Folio'])
 
 
 
