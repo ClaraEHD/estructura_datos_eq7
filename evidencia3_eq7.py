@@ -261,7 +261,32 @@ def consultar_por_rfc(notas):
     for nota in rfc_ordenado:
         print("RFC del cliente: ", nota['RFC'], "   Folio: ", nota['Folio'])
 
-
+folio =int(input("Ingrese el folio de la persona que desea consultar: "))
+    folio_encontrado=False
+    for nota in notas:
+        if nota['Folio'] == folio and nota['Estatus']==False:
+            print("\nDetalle de la nota:\n")
+            print(f"Folio: {nota['Folio']}\n")
+            print(f"Fecha: {nota['Fecha']}\n")
+            print(f"Nombre del cliente: {nota['Cliente']}\n")
+            print(f"RFC: {nota['RFC']}\n")
+            print(f"Servicio: \n {nota['Detalles']}\n")
+            print(f"Costo del servicio: {nota['Monto_pago']}")
+            print(f"Monto promedio: {nota['Promedio_monto']}")
+            p_importar=input("¿Desea importar la información a excel? SI/NO ")
+            folio_encontrado=True
+            if p_importar.strip().upper()=="SI":
+                rfcnota=nota['RFC']
+                fecha_str = datetime.datetime.today().date().strftime('%d-%m-%Y')
+                nombre_archivo=f"{rfcnota}_{fecha_str}.xlsx"
+                print(type(nombre_archivo))
+                exportar_a_excel(notas, nombre_archivo)
+                print(f'Datos exportados a {os.path.abspath(nombre_archivo)}') ##pendiente ubicación de archivo
+            else:
+                print("Regresando al menu de consultas")
+                sub_menu_consultas(notas, notas_canceladas) 
+    if not folio_encontrado:
+            print("No se encontró una nota válida para el folio ingresado.")
 
 
 
