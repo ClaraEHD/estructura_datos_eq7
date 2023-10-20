@@ -172,7 +172,7 @@ def comprobar_existencia_archivo():
 def leer_datos_desde_csv():
     notas = []
     notas_canceladas=[]
-    with open(archivo_csv, 'r', newline='') as archivo:
+    with open(archivo_csv, 'r', newline='')as archivo:
         lector = csv.reader(archivo)
         next(lector)
         for Folio, Fecha, Cliente, RFC, Correo, Monto_pago, Detalles, Estatus, Promedio_monto in lector:
