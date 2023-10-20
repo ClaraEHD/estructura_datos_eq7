@@ -261,7 +261,7 @@ def consultar_por_rfc(notas):
     for nota in rfc_ordenado:
         print("RFC del cliente: ", nota['RFC'], "   Folio: ", nota['Folio'])
 
-folio =int(input("Ingrese el folio de la persona que desea consultar: "))
+    folio =int(input("Ingrese el folio de la persona que desea consultar: "))
     folio_encontrado=False
     for nota in notas:
         if nota['Folio'] == folio and nota['Estatus']==False:
