@@ -252,7 +252,9 @@ def consultar_por_folio(notas):
         print("No se encontró una nota válida para el folio ingresado.")
     sub_menu_consultas(notas, notas_canceladas)
 
-
+##función para ordenar rfc 
+def RFC_ORDENADO(RFC):
+    return RFC['RFC']
 
 
 
