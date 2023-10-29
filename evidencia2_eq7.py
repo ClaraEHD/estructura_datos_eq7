@@ -148,6 +148,7 @@ def validar_correo(correoelectronico):
     else:
         print("ERROR. El dato ingresado no es valido. Vuelva a intentarlo")
         return False 
+    ##hasta aquí
 
 def guardar_datos_csv(notas):
     # Define los nombres de las columnas (campos del diccionario)
@@ -361,7 +362,7 @@ if comprobar_existencia_archivo():
     print("Notas canceladas: \n ", notas_canceladas)
     print(type(notas))
 else:
-    print("No se ha encontrado un archivo CSV existente.")
+    print("No se ha encontrado un  CSV existente.")
     print("Se parte de un estado inicial vacío.")
     
 menu_principal(notas, notas_canceladas)
