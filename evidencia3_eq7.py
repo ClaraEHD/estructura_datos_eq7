@@ -4,7 +4,7 @@ import re
 import os
 import csv
 
-def menu_principal(notas):
+def menu_principal(notas,clientes,servicios):
     while True:
         print("\n--- Menú Taller Mecánico ---")
         print("1. Registrar una nota")
@@ -28,42 +28,40 @@ def menu_principal(notas):
                     print("Ingrese una fecha válida")    
 
             while True:
-                cliente=input("Ingrese el nombre del cliente: ")
-                if cliente.strip() !="":
+                cliente_clave=int(input("Ingrese la clave del cliente: "))
+                if cliente_clave:
                     break
-                else:
-                    print("No puede dejar el campo vacío")
-    
-            while True:
-                rfc = input("Por favor, ingrese su RFC: ")
-                if validar_rfc(rfc):
-                    break
-                else:
-                    print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
+                elif cliente_clave==False:
+                    print("No puede dejar el campo vacío") ##arreglar la validación
+                    cliente=1
+                #aquí se agrega el nombre, rfc, correo desde la base de datos
+
+           # while True:
+            #    rfc = input("Por favor, ingrese su RFC: ")
+             #   if validar_rfc(rfc):
+              #      break
+               # else:
+                #    print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
             
             monto_pago = 0
             detalle = ""
             cant_servicios=0
             
-            while True:
+          #  while True:
                 # Pedir al usuario que ingrese un correo
-                correoelectronico = input("Ingresa un correo electrónico: ")
-                if (correoelectronico.strip()==""):
-                    print("El correo no puede ser omitido")
-                elif (validar_correo(correoelectronico)):
-                    break 
+           #     correoelectronico = input("Ingresa un correo electrónico: ")
+            #    if (correoelectronico.strip()==""):
+             #       print("El correo no puede ser omitido")
+              #  elif (validar_correo(correoelectronico)):
+               #     break 
             
             while True:
-                servicio=input("Ingrese el detalle del servicio realizado (dejar vacío para cancelar): ") #Ingresar mas de un servicio
-                if servicio.strip()=="":
+                servicio_clave=input("Ingrese la clave del servicio realizado (0 para cancelar): ") #Ingresar mas de un servicio
+                if servicio_clave==0:
                     break
-                while True:
-                    try:
-                        costo_servicio=float(input("Ingrese el costo del servicio: "))
-                        if costo_servicio!=0:
-                            break
-                    except ValueError:
-                        print("Ingrese una cantidad valida. ")
+                costo_servicio=1#agregar un select de la base de datos
+                servicio=1#agreagr un select de la base de datos 
+    
 
                 monto_pago+=costo_servicio #suma de los costos del servicio
                 sum_detalle=f"Servicio: {servicio}, Costo: {costo_servicio} \n"
@@ -75,8 +73,8 @@ def menu_principal(notas):
             nota["Folio"] = folio_num
             nota["Fecha"] = fecha
             nota["Cliente"] = cliente
-            nota["RFC"] = rfc 
-            nota["Correo"]= correoelectronico
+            nota["RFC"] = 1#pendiente también
+            nota["Correo"]= 1 #pendiente
             nota["Monto_pago"] = monto_pago
             nota["Detalles"] = detalle
             nota["Estatus"] = False
@@ -214,6 +212,7 @@ def consultar_por_periodo(notas):
     except ValueError:
         print("Fecha ingresada inválida.")
         return
+    
     total_monto = 0
     count_notas = 0
 
@@ -346,6 +345,8 @@ def recuperar_nota_cancelada(notas):
 
 
 notas=list()
+clientes=list()
+servicios=list()
 
 # Comprobar la existencia del archivo CSV
 if comprobar_existencia_archivo():
@@ -361,4 +362,4 @@ else:
     print("No se ha encontrado un  CSV existente.")
     print("Se parte de un estado inicial vacío.")
     
-menu_principal(notas)
+menu_principal(notas,clientes,servicios)
