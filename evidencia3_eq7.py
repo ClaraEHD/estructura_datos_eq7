@@ -365,6 +365,36 @@ else:
     
 menu_principal(notas,clientes,servicios)
 
+##########################SERVICIOS#################################
+
+def menu_reportes_servicios():
+    while True:
+        print("\n--- Menú de Consultas y Reportes de Servicios ---")
+        print("1. Consultas por clave de servicio")
+        print("2. Consultas por nombre de servicio")
+        print("3. Reportes ordenados por clave de servicio")
+        print("4. Reportes ordenados por nombre de servicio")
+        print("5. Volver al menú de servicios")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            # Lógica para la consulta por clave de servicio
+            buscar_por_clave_servicio()
+        elif opcion == "2":
+            # Lógica para la consulta por nombre de servicio
+            buscar_por_nombre_servicio()
+        elif opcion == "3":
+            # Lógica para reportes ordenados por clave de servicio
+            generar_reporte_servicios_por_clave()
+        elif opcion == "4":
+            # Lógica para reportes ordenados por nombre de servicio
+            generar_reporte_servicios_por_nombre()
+        elif opcion == "5":
+            menu_principal
+            break
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
+
 def agregar_servicios(servicios):
     #clave unica que tiene que ser generada automaticamente id_servicio
     while True:
