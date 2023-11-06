@@ -449,3 +449,36 @@ def buscar_por_nombre_servicio():
     else:
         print(f"No se encontró ningún servicio con el nombre '{nombre_servicio_buscar}'.")
     conn.close()
+
+def generar_reporte_servicios_por_clave():
+    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
+    cursor = conn.cursor()
+
+    # Realizar la consulta SELECT para obtener todos los servicios ordenados por clave
+    cursor.execute("SELECT * FROM SERVICIOS ORDER BY id_servicio")
+    servicios = cursor.fetchall()
+
+    # Imprimir el reporte tabular en la consola
+    print("\nReporte de servicios ordenados por clave:\n")
+    print("Clave \t Nombre de servicio \t Costo")
+    for servicio in servicios:
+        print(f"{servicio[0]} \t {servicio[1]} \t {servicio[2]}")
+
+    # Pedir al usuario que elija una opción
+    while True:
+        opcion = input("\nElija una opción: Exportar a CSV (1), Exportar a Excel (2), o Regresar al menú de reportes (3): ")
+        if opcion == '1':
+            exportar_a_csv(servicios, "ReporteServiciosPorClave")
+            break
+        elif opcion == '2':
+            exportar_a_excel(servicios, "ReporteServiciosPorClave")
+            break
+        elif opcion == '3':
+            break
+        else:
+            print("Opción no válida. Intente nuevamente.")
+
+    conn.close()
+
+
+
