@@ -4,6 +4,8 @@ import re
 import os
 import csv
 import sqlite3
+from sqlite3 import Error
+import sys
 
 def menu_notas(notas,clientes,servicios):
     while True:
@@ -17,7 +19,7 @@ def menu_notas(notas,clientes,servicios):
         opcion = input("Seleccione una opción: ")
         if opcion == "1":
             nota={}
-            folio_num = len(notas) + 1
+            #folio_num = len(notas) + 1
             while True:
                 try:
                     fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
@@ -31,6 +33,8 @@ def menu_notas(notas,clientes,servicios):
             while True:
                 cliente_clave=int(input("Ingrese la clave del cliente: "))
                 if cliente_clave:
+                    valores = {"RFC":cliente_clave}
+                    rfc_cliente=("SELECT RFC FROM proyecto WHERE RFC = :RFC", valores)
                     break
                 elif cliente_clave==False:
                     print("No puede dejar el campo vacío") ##arreglar la validación
@@ -62,26 +66,49 @@ def menu_notas(notas,clientes,servicios):
                     break
                 costo_servicio=1#agregar un select de la base de datos
                 servicio=1#agreagr un select de la base de datos 
-    
 
                 monto_pago+=costo_servicio #suma de los costos del servicio
                 sum_detalle=f"Servicio: {servicio}, Costo: {costo_servicio} \n"
                 detalle+=sum_detalle
                 cant_servicios+=1
+                nombre_id_servicio=f"ID_SERVICIO{cant_servicios}"
+                servicio[nombre_id_servicio]=servicio_clave
+                
             promedio_monto=monto_pago/cant_servicios
                 
 
-            nota["Folio"] = folio_num
+            #nota["Folio"] = folio_num
             nota["Fecha"] = fecha
-            nota["Cliente"] = cliente
-            nota["RFC"] = 1#pendiente también
-            nota["Correo"]= 1 #pendiente
-            nota["Monto_pago"] = monto_pago
-            nota["Detalles"] = detalle
             nota["Estatus"] = False
             nota["Promedio_monto"]=promedio_monto
+            nota["Monto_pago"] = monto_pago
+            nota["RFC"] = rfc_cliente
             notas.append(nota)
-            print(f"El folio es: {nota['Folio']}")
+            #solo se puede agregar un registro por el momento
+            servicios_notas=list(servicio.values())
+
+
+#insersión de datos en las notass
+            try:
+                with sqlite3.connect("PrimerIntentoDemo.db") as conn:
+                    mi_cursor = conn.cursor()
+                    mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_promedio, monto_pago, RFC)\
+                                      (:Fecha,:Estatus,:Promedio_monto,:Monto_pago,:RFC')",notas)
+                  ##  folio={"FOLIO":mi_cursor.lastrowid}
+                  ##  folio_servicio=("SELECT FOLIO FROM NOTAS WHERE FOLIO=:FOLIO",folio)
+                    folio=mi_cursor.lastrowid
+                    for servicio in servicios_notas:
+                        valores=(folio, servicios_notas)
+                        mi_cursor.execute("INSERT INTO SERVICIOS_NOTAS (folio, ID_SERVICIO) \
+                        VALUES(?,?)",valores)
+                    print(f"La clave asignada a la nota fue {folio}")
+            except Error as e:
+                print (e)
+            except:
+                print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+            finally:
+                conn.close()
+
 
 
         elif opcion == "2":
@@ -167,7 +194,7 @@ def guardar_datos_csv(notas):
 
 def comprobar_existencia_archivo():
     return os.path.exists(archivo_csv)
-
+"""
 def leer_datos_desde_csv():
     notas = []
     with open(archivo_csv, 'r', newline='')as archivo:
@@ -190,7 +217,7 @@ def leer_datos_desde_csv():
             elif nota['Estatus']=='True':
                 nota['Estatus']==True
                 notas.append(nota)
-    return notas
+    return notas"""
 
 def consultar_por_periodo(notas): 
     notas_periodo = []
@@ -344,7 +371,7 @@ def recuperar_nota_cancelada(notas):
     print("\nVolviendo al menu ")
     return None
 
-# Comprobar la existencia del archivo CSV
+"""# Comprobar la existencia del archivo CSV
 if comprobar_existencia_archivo():
     notas=leer_datos_desde_csv()
     print("Se ha recuperado el estado de la aplicación a partir del archivo CSV.")
@@ -356,7 +383,7 @@ if comprobar_existencia_archivo():
             print("Notas canceladas: \n ", nota)
 else:
     print("No se ha encontrado un  CSV existente.")
-    print("Se parte de un estado inicial vacío.")
+    print("Se parte de un estado inicial vacío.")"""
     
 ##########################SERVICIOS#################################
 
@@ -574,11 +601,11 @@ def menu_principal(notas,clientes,servicios):
         print("4. Salir")
         op=input("Por favor escoja una opción: ")
         if op == "1":
-            menu_notas(notas)
+            menu_notas(notas, clientes, servicios)
         elif op == "2":
             print("In development") #COLOCAR MENU CLIENTES
         elif op == "3":
-            menu_servicios()
+            menu_servicios(servicios)
         elif op == "4":
             print("Saliendo del programa...")
             break
