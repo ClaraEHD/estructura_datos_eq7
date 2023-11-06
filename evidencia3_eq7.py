@@ -390,3 +390,40 @@ def agregar_servicios(servicios):
                 print("Error: Ingrese un valor numérico válido para el costo.")
 
             conn.close()
+
+def buscar_por_clave_servicio():
+    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
+    cursor = conn.cursor()
+
+    # Mostrar el listado tabular de claves y nombres de servicio mediante sentencia select
+    cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS")
+    servicios = cursor.fetchall()
+
+    # Imprimir el listado tabular
+    print("Listado de servicios:\n")
+    print("Clave \t Nombre de servicio")
+    for servicio in servicios:
+        print(f"{servicio[0]} \t {servicio[1]}")
+
+    # Pedir al usuario que elija una clave
+    while True:
+        try:
+            clave_elegida = int(input("\nElija una clave de servicio: "))
+            break
+        except ValueError:
+            print("Ingrese un valor numérico para la clave.")
+
+    # Se realiza la consulta select para obtener el detalle del servicio asociado con esa clave
+    cursor.execute("SELECT * FROM SERVICIOS WHERE ID_SERVICIO=?", (clave_elegida,))
+    servicio_elegido = cursor.fetchone()
+
+    # Imprimir el detalle del servicio
+    if servicio_elegido:
+        print("\nDetalle del servicio:\n")
+        print(f"Clave: {servicio_elegido[0]}")
+        print(f"Nombre de servicio: {servicio_elegido[1]}")
+        print(f"Costo: {servicio_elegido[2]}")
+    else:
+        print("No se encontró ningún servicio con la clave ingresada.")
+
+    conn.close()
