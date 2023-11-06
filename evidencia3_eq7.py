@@ -510,4 +510,11 @@ def generar_reporte_servicios_por_nombre():
 
     conn.close()
 
+def exportar_a_csv(datos, nombre_archivo):
+    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
+    timestamp = datetime.now().strftime("%m_%d_%Y")
+    nombre_archivo += f"_{timestamp}.csv"
+    df.to_csv(nombre_archivo, index=False)
+    print(f"Datos exportados a {nombre_archivo}")
+
 
