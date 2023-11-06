@@ -523,3 +523,21 @@ def exportar_a_excel(datos, nombre_archivo):
     nombre_archivo += f"_{timestamp}.xlsx"
     df.to_excel(nombre_archivo, index=False)
     print(f"Datos exportados a {nombre_archivo}")
+
+def menu_servicios():
+    while True:
+        print("\n--- Menú de Servicios ---")
+        print("1. Agregar un servicio")
+        print("2. Consultas y reportes de servicios")
+        print("3. Volver al menú principal")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            agregar_servicios(servicios)
+        elif opcion == "2":
+            menu_reportes_servicios()
+        elif opcion == "3":
+            menu_principal(notas,clientes,servicios)
+            break
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
