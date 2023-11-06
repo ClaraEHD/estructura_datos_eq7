@@ -541,3 +541,23 @@ def menu_servicios():
             break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
+
+def menu_principal(notas,clientes,servicios):
+    while True:
+        print("\n--- Menú Taller Mecánico ---")
+        print("1. Notas")
+        print("2. Clientes")
+        print("3. Servicios")
+        print("4. Salir")
+        op=input("Por favor escoja una opción: ")
+        if op == "1":
+            menu_notas(notas)
+        elif op == "2":
+            print("In development") #COLOCAR MENU CLIENTES
+        elif op == "3":
+            menu_servicios()
+        elif op == "4":
+            print("Saliendo del programa...")
+            break
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
