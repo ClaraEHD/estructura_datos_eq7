@@ -427,3 +427,25 @@ def buscar_por_clave_servicio():
         print("No se encontró ningún servicio con la clave ingresada.")
 
     conn.close()
+
+def buscar_por_nombre_servicio():
+    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
+    cursor = conn.cursor()
+
+    # Pedir al usuario que ingrese el nombre del servicio a buscar
+    nombre_servicio_buscar = input("Ingrese el nombre del servicio a buscar: ")
+
+    # Realizar la consulta SELECT con el filtro de nombre de servicio (ignorando mayúsculas y minúsculas)
+    cursor.execute("SELECT * FROM SERVICIOS WHERE UPPER(NOMBRE_SERVICIO) = UPPER(?)", (nombre_servicio_buscar,))
+    servicios_encontrados = cursor.fetchall()
+
+    # Imprimir el reporte de detalles de los servicios encontrados
+    if servicios_encontrados:
+        print("\nDetalle del servicio/es encontrado/s:\n")
+        for servicio in servicios_encontrados:
+            print(f"Clave: {servicio[0]}")
+            print(f"Nombre de servicio: {servicio[1]}")
+            print(f"Costo: {servicio[2]}\n")
+    else:
+        print(f"No se encontró ningún servicio con el nombre '{nombre_servicio_buscar}'.")
+    conn.close()
