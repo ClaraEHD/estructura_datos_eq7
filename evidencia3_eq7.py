@@ -5,7 +5,7 @@ import os
 import csv
 import sqlite3
 
-def menu_principal(notas,clientes,servicios):
+def menu_notas(notas,clientes,servicios):
     while True:
         print("\n--- Menú Taller Mecánico ---")
         print("1. Registrar una nota")
@@ -344,11 +344,6 @@ def recuperar_nota_cancelada(notas):
     print("\nVolviendo al menu ")
     return None
 
-
-notas=list()
-clientes=list()
-servicios=list()
-
 # Comprobar la existencia del archivo CSV
 if comprobar_existencia_archivo():
     notas=leer_datos_desde_csv()
@@ -363,8 +358,6 @@ else:
     print("No se ha encontrado un  CSV existente.")
     print("Se parte de un estado inicial vacío.")
     
-menu_principal(notas,clientes,servicios)
-
 ##########################SERVICIOS#################################
 
 def menu_reportes_servicios():
@@ -591,3 +584,8 @@ def menu_principal(notas,clientes,servicios):
             break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
+
+notas = list()
+clientes = list()
+servicios = list()
+menu_principal(notas,clientes,servicios)
