@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import os
 import csv
+import sqlite3
 
 def menu_principal(notas,clientes,servicios):
     while True:
@@ -363,3 +364,29 @@ else:
     print("Se parte de un estado inicial vacío.")
     
 menu_principal(notas,clientes,servicios)
+
+def agregar_servicios(servicios):
+    #clave unica que tiene que ser generada automaticamente id_servicio
+    while True:
+            try:
+                nombre_servicio = input("Ingrese el nombre del servicio (no puede quedar vacío): ")
+                if not nombre_servicio.strip():
+                    print("El nombre del servicio no puede estar vacío. Intente nuevamente.")
+                    continue
+                
+                costo = float(input("Ingrese el costo del servicio (debe ser superior a 0.00): "))
+                if costo <= 0.00:
+                    print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
+                    continue
+
+                # Insertara los datos en la tabla
+                conn = sqlite3.connect('BD_TALLER_MECANICO.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO) VALUES (?, ?, ?, ?)", (nombre_servicio, costo))
+                conn.commit()
+                print("Servicio agregado con éxito.")
+                break
+            except ValueError:
+                print("Error: Ingrese un valor numérico válido para el costo.")
+
+            conn.close()
