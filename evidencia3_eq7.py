@@ -7,9 +7,78 @@ import sqlite3
 from sqlite3 import Error
 import sys
 
+
+
+def menu_clientes():
+    print("\n\t--- Menú Clientes ---")
+    print("1. Agregar un cliente")
+    print("2. Consultas y reportes de clientes")
+    print("3. Volver al menú anterior (Menú Principal)")
+
+def agregar_cliente():
+    try:
+        ##trabaje usando una base de datos de nombre "Taller.bd" para agilizar las cosas
+        with  sqlite3.connect("Taller.bd") as conn:
+            mi_cursor = conn.cursor()
+            while True:
+                print("Agregar Cliente: \n")
+                RFC = input("Ingresa el RFC completo del cliente: ")
+                NOMBRE = input("Ingresa el nombre completo del cliente: ")
+                CORREO = input("Ingrese el correo del cliente: ")
+                valores = {"RFC":RFC, "NOMBRE":NOMBRE, "CORREO":CORREO}
+                mi_cursor = conn.cursor("INSERT INTO CLIENTES VALUES(:RFC,:NOMBRE,:CORREO);",valores)                
+    except Error as e:
+        print(e)
+    except Exception:
+        print(f"Se produjo el error: {sys.exc_info()}")
+    finally:
+        if(conn):
+            conn.close()
+
+def menu_consultas_clientes():
+    print("\n\t--- Menú Consultas y Reportes ---")
+    print("1. Listado de Clientes Registrados")
+    print("2. Busqueda Por Clave")
+    print("3. Busqueda por nombre")
+    print("4. Volver al menú anterior (clientes)")
+
+def menu_ordenados_de_clientes():
+    print("\n\t--- Menú Listado de Clientes Registrados ---")
+    print("1. Ordenado por clave")
+    print("2. Ordenado por nombre")
+    print("3. Volver al menú anterior (consultas y reportes)")
+
+def ordenar_por_clave():
+    with  sqlite3.connect("Taller.bd") as conn:
+        mi_cursor = conn.cursor()
+        mi_cursor = conn.cursor("SELECT * FROM CLIENTES order by RFC")
+def ordenar_por_nombre():
+    with  sqlite3.connect("Taller.bd") as conn:
+        mi_cursor = conn.cursor()
+        mi_cursor = conn.cursor("SELECT * FROM CLIENTES order by NOMBRE")
+def buscar_por_nombre():
+    with  sqlite3.connect("Taller.bd") as conn:
+        mi_cursor = conn.cursor()
+        print("Busqueda por NOMBRE")
+        NOMBRE = input("Ingrese el nombre del cliente: ")
+        Busqueda = {"NOMBRE":NOMBRE}
+        mi_cursor = conn.cursor("SELECT * FROM CLIENTES WHERE NOMBRE = :NOMBRE", Busqueda)
+    
+def buscar_por_clave():
+    with  sqlite3.connect("Taller.bd") as conn:
+        mi_cursor = conn.cursor()
+        print("Busqueda por CLAVE")
+        RFC = input("Ingrese La clave del cliente: ")
+        Busqueda = {"RFC":RFC}
+        mi_cursor = conn.cursor("SELECT * FROM CLIENTES WHERE NOMBRE = :RFC", Busqueda)
+
+
+
 def menu_notas(notas,clientes,servicios):
     while True:
         print("\n--- Menú Taller Mecánico ---")
+        #para no mover mas lo hice 0 en lugar de mover el 2
+        print("0. Registrar una nota")
         print("1. Registrar una nota")
         print("2. Consultas y reportes")
         print("3. Cancelar una nota")
@@ -17,6 +86,61 @@ def menu_notas(notas,clientes,servicios):
         print("5. Salir")
             
         opcion = input("Seleccione una opción: ")
+        if opcion == "0":
+            
+            while True:    
+                menu_clientes()
+                navegacion = input("INGRESA OPCION: ")
+                ##MENU PRINCIPAL DE CLIENTES
+                if (navegacion == "1"):
+                    
+                    agregar_cliente()
+                    
+                ##MENU DE CONSULTAS Y REPORTES    
+                elif (navegacion == "2"):
+                    
+                    while True:
+                        
+                        menu_consultas_clientes()
+                        navegacion = input("INGRESA OPCION: ")
+                        
+                        #MENU DE LISTADO DE CLIENTES
+                        if (navegacion == "1"):
+                            
+                            menu_ordenados_de_clientes()
+                            navegacion = input("INGRESA OPCION: ")
+                            if(navegacion =="1"):
+                                print("ordenar por clave")
+                                ordenar_por_clave()
+                            elif(navegacion =="2"):
+                                print("ordenar por nombre")
+                                ordenar_por_nombre()
+                                
+                            elif(navegacion =="3"):
+                                print("volviendo a (Menu Consultas)")
+                            
+                        elif (navegacion == "2"):
+                            print("busqueda por clave")
+                            buscar_por_clave()
+                        
+                        elif (navegacion == "3"):
+                            print("busqueda por nombre")
+                            buscar_por_nombre()
+                        
+                        elif (navegacion == "4"):
+                            print("\n\tVolviendo al Menú Clientes\n")
+                            break
+                        else:
+                            print("\n\tOpcion NO valida. Vuelva a intentarlo")
+                            
+                elif (navegacion == "3"):
+                    print("\n\tVolviendo al Menú Principal\n")
+                    break
+                else:
+                    print("\n\tOpcion NO valida. Vuelva a intentarlo")
+                    
+
+        
         if opcion == "1":
             nota={}
             #folio_num = len(notas) + 1
