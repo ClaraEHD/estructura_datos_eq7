@@ -1,9 +1,10 @@
-import datetime
-import pandas as pd
+from datetime import datetime
 import re
 import os
 import csv
+import pandas as PD
 import sqlite3
+from sqlite3 import Error
 
 def menu_notas(notas,clientes,servicios):
     while True:
@@ -383,7 +384,7 @@ def menu_reportes_servicios():
             # Lógica para reportes ordenados por nombre de servicio
             generar_reporte_servicios_por_nombre()
         elif opcion == "5":
-            menu_principal
+            menu_principal()
             break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
@@ -396,16 +397,26 @@ def agregar_servicios(servicios):
                 if not nombre_servicio.strip():
                     print("El nombre del servicio no puede estar vacío. Intente nuevamente.")
                     continue
-                
-                costo = float(input("Ingrese el costo del servicio (debe ser superior a 0.00): "))
-                if costo <= 0.00:
-                    print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
+                if not re.match("^[A-Za-z ]*$", nombre_servicio):
+                    print("El nombre del servicio solo puede contener letras. Intente nuevamente.")
                     continue
+
+                while True:
+                    costo_servicio = (input("Ingrese el costo del servicio (debe ser superior a 0.00): "))
+                    try:
+                        costo_servicio = float(costo_servicio)
+                        if costo_servicio <= 0.00:
+                            print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
+                            continue
+                        break
+                    except ValueError:
+                        print("Error: Ingrese un valor numérico válido para el costo.")
+
 
                 # Insertara los datos en la tabla
                 conn = sqlite3.connect('BD_TALLER_MECANICO.db')
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO) VALUES (?, ?, ?, ?)", (nombre_servicio, costo))
+                cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO_SERVICIO) VALUES (?, ?)", (nombre_servicio, costo_servicio))
                 conn.commit()
                 print("Servicio agregado con éxito.")
                 break
@@ -422,6 +433,11 @@ def buscar_por_clave_servicio():
     cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS")
     servicios = cursor.fetchall()
 
+    #Si no se encuentran servicios
+    if not servicios:
+        print("No se encontró ningún servicio.")
+        return
+    
     # Imprimir el listado tabular
     print("Listado de servicios:\n")
     print("Clave \t Nombre de servicio")
@@ -445,7 +461,7 @@ def buscar_por_clave_servicio():
         print("\nDetalle del servicio:\n")
         print(f"Clave: {servicio_elegido[0]}")
         print(f"Nombre de servicio: {servicio_elegido[1]}")
-        print(f"Costo: {servicio_elegido[2]}")
+        print(f"Costo: ${servicio_elegido[2]} MXN")
     else:
         print("No se encontró ningún servicio con la clave ingresada.")
 
@@ -461,6 +477,11 @@ def buscar_por_nombre_servicio():
     # Realizar la consulta SELECT con el filtro de nombre de servicio (ignorando mayúsculas y minúsculas)
     cursor.execute("SELECT * FROM SERVICIOS WHERE UPPER(NOMBRE_SERVICIO) = UPPER(?)", (nombre_servicio_buscar,))
     servicios_encontrados = cursor.fetchall()
+
+    #Si no se encuentran servicios
+    if not servicios_encontrados:
+        print("No se encontró ningún servicio.")
+        return
 
     # Imprimir el reporte de detalles de los servicios encontrados
     if servicios_encontrados:
@@ -536,16 +557,19 @@ def generar_reporte_servicios_por_nombre():
 def exportar_a_csv(datos, nombre_archivo):
     df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
     timestamp = datetime.now().strftime("%m_%d_%Y")
-    nombre_archivo += f"_{timestamp}.csv"
+    nombre_archivo += f"{ruta_guardado}/{nombre_archivo}_{timestamp}.csv"
     df.to_csv(nombre_archivo, index=False)
     print(f"Datos exportados a {nombre_archivo}")
 
 def exportar_a_excel(datos, nombre_archivo):
     df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
     timestamp = datetime.now().strftime("%m_%d_%Y")
-    nombre_archivo += f"_{timestamp}.xlsx"
+    nombre_archivo = f"{ruta_guardado}/{nombre_archivo}_{timestamp}.xlsx"
     df.to_excel(nombre_archivo, index=False)
     print(f"Datos exportados a {nombre_archivo}")
+
+#ESTA ES UNA VARIABLE QUE AYUDA A CAMBIAR RUTA DE GUARDADO DE LOS ARCHIVOS A EXPORTAR
+ruta_guardado = '/content'
 
 def menu_servicios():
     while True:
@@ -560,8 +584,7 @@ def menu_servicios():
         elif opcion == "2":
             menu_reportes_servicios()
         elif opcion == "3":
-            menu_principal(notas,clientes,servicios)
-            break
+            return
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
@@ -574,7 +597,7 @@ def menu_principal(notas,clientes,servicios):
         print("4. Salir")
         op=input("Por favor escoja una opción: ")
         if op == "1":
-            menu_notas(notas)
+            menu_notas(notas,clientes,servicios)
         elif op == "2":
             print("In development") #COLOCAR MENU CLIENTES
         elif op == "3":
@@ -584,6 +607,7 @@ def menu_principal(notas,clientes,servicios):
             break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
+
 
 notas = list()
 clientes = list()
