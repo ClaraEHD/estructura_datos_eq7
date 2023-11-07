@@ -3,7 +3,7 @@ import re
 import os
 import csv
 import pandas as PD
-import sqlite3
+from sqlite3 import Error
 
 def menu_notas(notas,clientes,servicios):
     while True:
