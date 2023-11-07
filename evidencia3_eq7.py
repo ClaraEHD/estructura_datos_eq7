@@ -8,216 +8,233 @@ from sqlite3 import Error
 import sys
 
 
-
 def menu_clientes():
-    print("\n\t--- Menú Clientes ---")
-    print("1. Agregar un cliente")
-    print("2. Consultas y reportes de clientes")
-    print("3. Volver al menú anterior (Menú Principal)")
-
+    while True:
+        print("\n\t--- Menú Clientes ---")
+        print("1. Agregar un cliente")
+        print("2. Consultas y reportes de clientes")
+        print("3. Volver al menú anterior (Menú Principal)")
+        eleccion=int(input("Elija una opción: "))
+        if eleccion==1:
+            agregar_cliente()
+        elif eleccion==2:
+            menu_consultas_clientes()
+        elif eleccion==3:
+            menu_principal()
+        else:
+            print("Opción inválida")
 def agregar_cliente():
-    try:
-        ##trabaje usando una base de datos de nombre "Taller.bd" para agilizar las cosas
-        with  sqlite3.connect("Taller.bd") as conn:
-            mi_cursor = conn.cursor()
-            while True:
-                print("Agregar Cliente: \n")
-                RFC = input("Ingresa el RFC completo del cliente: ")
-                NOMBRE = input("Ingresa el nombre completo del cliente: ")
-                CORREO = input("Ingrese el correo del cliente: ")
-                valores = {"RFC":RFC, "NOMBRE":NOMBRE, "CORREO":CORREO}
-                mi_cursor = conn.cursor("INSERT INTO CLIENTES VALUES(:RFC,:NOMBRE,:CORREO);",valores)                
-    except Error as e:
-        print(e)
-    except Exception:
-        print(f"Se produjo el error: {sys.exc_info()}")
-    finally:
-        if(conn):
+    print("Agregar Cliente: \n")
+    print("Lista de clientes activos: ")
+    
+    rfc = input("Por favor, ingrese su RFC: ")
+    validar_rfc(rfc)
+    nombre = input("Ingresa el nombre completo del cliente: ")
+    if nombre.strip()=="":
+        print("No se puede dejar el campo vacío")
+        
+    correo = input("Ingrese el correo del cliente: ")
+    validar_correo(correo)
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                valores=(rfc, nombre, correo)
+                mi_cursor.execute("INSERT INTO CLIENTES (RFC, cliente, correo) VALUES(?,?,?)",valores)
+                print("Datos insertados correctamente")          
+                break      
+        except Error as e:
+            print(e)
+        except Exception:
+            print(f"Se produjo el error: {sys.exc_info()}")
+        finally:
             conn.close()
 
 def menu_consultas_clientes():
-    print("\n\t--- Menú Consultas y Reportes ---")
-    print("1. Listado de Clientes Registrados")
-    print("2. Busqueda Por Clave")
-    print("3. Busqueda por nombre")
-    print("4. Volver al menú anterior (clientes)")
+    while True:
+        print("\n\t--- Menú Consultas y Reportes ---")
+        print("Listado de Clientes Registrados")
+        print("1. Busqueda por clave")
+        print("2. Busqueda por nombre")
+        print("3. Volver al menú anterior (clientes)")
+        ##listado de clientes
+        opcion=int(input("Elija una opcion: "))
+        if opcion==1:
+            ordenar_por_clave_clientes()
+        elif opcion==2:
+            ordenar_por_nombre_clientes()
+        elif opcion==3:
+            break
+        else:
+            ("Opción inválida")
 
-def menu_ordenados_de_clientes():
-    print("\n\t--- Menú Listado de Clientes Registrados ---")
-    print("1. Ordenado por clave")
-    print("2. Ordenado por nombre")
-    print("3. Volver al menú anterior (consultas y reportes)")
+def ordenar_por_clave_clientes():
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute(("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY clave_cliente"))
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("Listado de clientes ordenados por clave:\n")
+                    print("Clave \t Nombre de servicio")
+                    for clave, nombre, rfc, correo  in clientes:
+                        print(f"\n{clave} \t {nombre}\t {rfc}\t {correo}")
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
 
-def ordenar_por_clave():
-    with  sqlite3.connect("Taller.bd") as conn:
-        mi_cursor = conn.cursor()
-        mi_cursor = conn.cursor("SELECT * FROM CLIENTES order by RFC")
-def ordenar_por_nombre():
-    with  sqlite3.connect("Taller.bd") as conn:
-        mi_cursor = conn.cursor()
-        mi_cursor = conn.cursor("SELECT * FROM CLIENTES order by NOMBRE")
-def buscar_por_nombre():
-    with  sqlite3.connect("Taller.bd") as conn:
-        mi_cursor = conn.cursor()
-        print("Busqueda por NOMBRE")
-        NOMBRE = input("Ingrese el nombre del cliente: ")
-        Busqueda = {"NOMBRE":NOMBRE}
-        mi_cursor = conn.cursor("SELECT * FROM CLIENTES WHERE NOMBRE = :NOMBRE", Busqueda)
-    
-def buscar_por_clave():
-    with  sqlite3.connect("Taller.bd") as conn:
-        mi_cursor = conn.cursor()
-        print("Busqueda por CLAVE")
-        RFC = input("Ingrese La clave del cliente: ")
-        Busqueda = {"RFC":RFC}
-        mi_cursor = conn.cursor("SELECT * FROM CLIENTES WHERE NOMBRE = :RFC", Busqueda)
+def ordenar_por_nombre_clientes():
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute(("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY nombre"))
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("Listado de clientes ordenados por nombre:\n")
+                    print("Clave \t Nombre de servicio")
+                    for clave, nombre, rfc, correo  in clientes:
+                        print(f"\n{clave} \t {nombre}\t {rfc}\t {correo}")
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
 
-
-
-def menu_notas(notas,clientes,servicios):
+def menu_notas():
     while True:
         print("\n--- Menú Taller Mecánico ---")
-        #para no mover mas lo hice 0 en lugar de mover el 2
-        print("0. Registrar una nota")
         print("1. Registrar una nota")
         print("2. Consultas y reportes")
         print("3. Cancelar una nota")
         print("4. Recuperar una nota")
         print("5. Salir")
-            
-        opcion = input("Seleccione una opción: ")
-        if opcion == "0":
-            
-            while True:    
-                menu_clientes()
-                navegacion = input("INGRESA OPCION: ")
-                ##MENU PRINCIPAL DE CLIENTES
-                if (navegacion == "1"):
-                    
-                    agregar_cliente()
-                    
-                ##MENU DE CONSULTAS Y REPORTES    
-                elif (navegacion == "2"):
-                    
-                    while True:
-                        
-                        menu_consultas_clientes()
-                        navegacion = input("INGRESA OPCION: ")
-                        
-                        #MENU DE LISTADO DE CLIENTES
-                        if (navegacion == "1"):
-                            
-                            menu_ordenados_de_clientes()
-                            navegacion = input("INGRESA OPCION: ")
-                            if(navegacion =="1"):
-                                print("ordenar por clave")
-                                ordenar_por_clave()
-                            elif(navegacion =="2"):
-                                print("ordenar por nombre")
-                                ordenar_por_nombre()
-                                
-                            elif(navegacion =="3"):
-                                print("volviendo a (Menu Consultas)")
-                            
-                        elif (navegacion == "2"):
-                            print("busqueda por clave")
-                            buscar_por_clave()
-                        
-                        elif (navegacion == "3"):
-                            print("busqueda por nombre")
-                            buscar_por_nombre()
-                        
-                        elif (navegacion == "4"):
-                            print("\n\tVolviendo al Menú Clientes\n")
-                            break
-                        else:
-                            print("\n\tOpcion NO valida. Vuelva a intentarlo")
-                            
-                elif (navegacion == "3"):
-                    print("\n\tVolviendo al Menú Principal\n")
+        opcion=int(input("Ingrese una opción: "))
+        if opcion == 1:
+            insertar_notas()
+        elif opcion ==2:
+            sub_menu_consultas()
+        elif opcion == 3:
+            cancelar_nota()
+        elif opcion == 4:
+            recuperar_nota_cancelada()
+        elif opcion == 5:
+            confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
+            if confirmacion_salida.lower() == 'si':
+                print("¡Hasta luego!")
+                break
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
+def insertar_notas():
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute(("SELECT clave_cliente, cliente FROM CLIENTES ORDER BY clave_cliente"))
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("Listado de clientes:\n")
+                    print("Clave \t Nombre de servicio")
+                    for clave, nombre in clientes:
+                        print(f"\n{clave} \t {nombre}")
+                else: 
+                    print("No se encontraron coincidencias")
                     break
-                else:
-                    print("\n\tOpcion NO valida. Vuelva a intentarlo")
-                    
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute("SELECT * FROM SERVICIOS ORDER BY id_servicio")
+                servicios = mi_cursor.fetchall()
 
-        
-        if opcion == "1":
-            nota={}
-            #folio_num = len(notas) + 1
-            while True:
-                try:
-                    fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
-                    if fecha<datetime.datetime.today().date():
-                        break
-                    else: 
-                        print("Ingrese una fecha válida")  
-                except ValueError:
-                    print("Ingrese una fecha válida")    
+                if servicios:
+                    print("\nListado de servicios disponibles:\n")
+                    print("Clave \t Nombre de servicio \t Costo")
+                    for id_servicio, nombre_servicio, costo_servicio in servicios:
+                        print(f"\n{id_servicio} \t {nombre_servicio} \t {costo_servicio}")
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
 
-            while True:
-                cliente_clave=int(input("Ingrese la clave del cliente: "))
-                if cliente_clave:
-                    valores = {"RFC":cliente_clave}
-                    rfc_cliente=("SELECT RFC FROM proyecto WHERE RFC = :RFC", valores)
+
+        notas=list()
+        nota={}
+        while True:
+            try:
+                fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
+                if fecha<datetime.datetime.today().date():
                     break
-                elif cliente_clave==False:
-                    print("No puede dejar el campo vacío") ##arreglar la validación
-                    cliente=1
-                #aquí se agrega el nombre, rfc, correo desde la base de datos
+                else: 
+                   print("Ingrese una fecha válida")  
+            except ValueError:
+                print("Ingrese una fecha válida")    
 
-           # while True:
-            #    rfc = input("Por favor, ingrese su RFC: ")
-             #   if validar_rfc(rfc):
-              #      break
-               # else:
-                #    print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
-            
-            monto_pago = 0
-            detalle = ""
-            cant_servicios=0
-            
-          #  while True:
-                # Pedir al usuario que ingrese un correo
-           #     correoelectronico = input("Ingresa un correo electrónico: ")
-            #    if (correoelectronico.strip()==""):
-             #       print("El correo no puede ser omitido")
-              #  elif (validar_correo(correoelectronico)):
-               #     break 
-            
-            while True:
-                servicio_clave=input("Ingrese la clave del servicio realizado (0 para cancelar): ") #Ingresar mas de un servicio
-                if servicio_clave==0:
-                    break
-                costo_servicio=1#agregar un select de la base de datos
-                servicio=1#agreagr un select de la base de datos 
+        while True:
+            cliente_clave=int(input("Ingrese la clave del cliente: "))
+            if cliente_clave==False:
+                print("No puede dejar el campo vacío") ##arreglar la 
+            if cliente_clave==True:
+                break
 
-                monto_pago+=costo_servicio #suma de los costos del servicio
-                sum_detalle=f"Servicio: {servicio}, Costo: {costo_servicio} \n"
-                detalle+=sum_detalle
-                cant_servicios+=1
-                nombre_id_servicio=f"ID_SERVICIO{cant_servicios}"
-                servicio[nombre_id_servicio]=servicio_clave
+        monto_pago = 0
+        detalle = ""
+        cant_servicios=0
+
+        while True:
+            servicio_clave=input("Ingrese la clave del servicio realizado (0 para cancelar): ") #Ingresar mas de un servicio
+            if servicio_clave==0:
+                break
+            valores={"id_servicio":servicio_clave}
+            costo_servicio=("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores)
+            servicio=("SELECT nombre_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores)
+
+            monto_pago+=costo_servicio 
+            sum_detalle=f"Servicio: {servicio}, Costo: {costo_servicio} \n"
+            detalle+=sum_detalle
+            cant_servicios+=1
+            nombre_id_servicio=f"id_servicio{cant_servicios}"
+            servicio[nombre_id_servicio]=servicio_clave
                 
-            promedio_monto=monto_pago/cant_servicios
+        promedio_monto=monto_pago/cant_servicios
                 
 
             #nota["Folio"] = folio_num
-            nota["Fecha"] = fecha
-            nota["Estatus"] = False
-            nota["Promedio_monto"]=promedio_monto
-            nota["Monto_pago"] = monto_pago
-            nota["RFC"] = rfc_cliente
-            notas.append(nota)
-            #solo se puede agregar un registro por el momento
-            servicios_notas=list(servicio.values())
+        nota["Fecha"] = fecha
+        nota["Estatus"] = False
+        nota["Promedio_monto"]=promedio_monto
+        nota["Monto_pago"] = monto_pago
+        nota["clave_cliente"] = cliente_clave
+        notas.append(nota)
+        servicios_notas=list(servicio.values())
 
 
-#insersión de datos en las notass
-            try:
+#insersión de datos en las notas
+        try:
                 with sqlite3.connect("PrimerIntentoDemo.db") as conn:
                     mi_cursor = conn.cursor()
-                    mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_promedio, monto_pago, RFC)\
-                                      (:Fecha,:Estatus,:Promedio_monto,:Monto_pago,:RFC')",notas)
+                    mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_promedio, monto_pago, clave_cliente)\
+                                      (:Fecha,:Estatus,:Promedio_monto,:Monto_pago,:clave_cliente')",notas)
+                    print(f"Datos insertados conrrectamente \nEl folio de la nota es {mi_cursor.lastrowid}")
                   ##  folio={"FOLIO":mi_cursor.lastrowid}
                   ##  folio_servicio=("SELECT FOLIO FROM NOTAS WHERE FOLIO=:FOLIO",folio)
                     folio=mi_cursor.lastrowid
@@ -226,31 +243,12 @@ def menu_notas(notas,clientes,servicios):
                         mi_cursor.execute("INSERT INTO SERVICIOS_NOTAS (folio, ID_SERVICIO) \
                         VALUES(?,?)",valores)
                     print(f"La clave asignada a la nota fue {folio}")
-            except Error as e:
+        except Error as e:
                 print (e)
-            except:
+        except:
                 print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-            finally:
+        finally:
                 conn.close()
-
-
-
-        elif opcion == "2":
-            sub_menu_consultas(notas)
-
-        elif opcion == "3":
-            cancelar_nota(notas)
-        elif opcion == "4":
-            recuperar_nota_cancelada(notas)
-        elif opcion == "5":
-            confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
-            if confirmacion_salida.lower() == 'si':
-                print("¡Hasta luego!")
-                guardar_datos_csv(notas)
-                break
-        else:
-            print("Opción inválida. Por favor, elija una opción válida.")
-
 
 def sub_menu_consultas(notas):
             print("\n--- Submenú Consultas y Reportes ---")
@@ -260,25 +258,19 @@ def sub_menu_consultas(notas):
             print("4. Regresa al menú principal")
             subopcion = input("Seleccione una opción: ")
             if subopcion == "1":
-                consultar_por_periodo(notas)
+                consultar_por_periodo()
             elif subopcion == "2":
-                consultar_por_folio(notas)
+                consultar_por_folio()
             elif subopcion == "3":
-                consultar_por_rfc(notas)
+                consultar_por_rfc()
             elif subopcion=="4":
-                menu_principal(notas)
+                menu_principal()
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
 
-##función para exportar a excel
 
 def exportar_a_excel(datos, nombre_archivo):
-    # Crear un DataFrame a partir de la lista de diccionarios
-    
     df = pd.DataFrame(datos)
-    
-    # Guardar el DataFrame en un archivo Excel
-    
     df.to_excel(nombre_archivo, index=False)
 
 def validar_rfc(rfc):
@@ -288,13 +280,10 @@ def validar_rfc(rfc):
     # Utiliza re.fullmatch para verificar si la cadena cumple con el patrón
     return bool(re.fullmatch(patron, rfc))
 
-archivo_csv = "Datos_taller_mecanico.csv"
-
 
 #Funcion para validar correo electronico
 def validar_correo(correoelectronico):
     Filtro = r'^[\w\.]+@[\w\.]+$'    
-    # Validar el correo
     if re.match(Filtro, correoelectronico):
         print("El correo electrónico es válido.")
         return True 
@@ -316,34 +305,7 @@ def guardar_datos_csv(notas):
         for diccionario in notas:
             writer.writerow(diccionario)
 
-def comprobar_existencia_archivo():
-    return os.path.exists(archivo_csv)
-"""
-def leer_datos_desde_csv():
-    notas = []
-    with open(archivo_csv, 'r', newline='')as archivo:
-        lector = csv.reader(archivo)
-        next(lector)
-        for Folio, Fecha, Cliente, RFC, Correo, Monto_pago, Detalles, Estatus, Promedio_monto in lector:
-            nota=dict()
-            nota['Folio']=int(Folio)
-            nota['Fecha']=datetime.datetime.strptime(Fecha, '%Y-%m-%d').date()
-            nota['Cliente']=Cliente
-            nota['RFC']=RFC
-            nota['Correo']=Correo
-            nota['Monto_pago']=float(Monto_pago)
-            nota['Detalles']=Detalles
-            nota['Estatus']=Estatus
-            nota['Promedio_monto']=float(Promedio_monto)
-            if nota['Estatus']=='False':
-                nota['Estatus']=False
-                notas.append(nota)
-            elif nota['Estatus']=='True':
-                nota['Estatus']==True
-                notas.append(nota)
-    return notas"""
-
-def consultar_por_periodo(notas): 
+def consultar_por_periodo(): 
     notas_periodo = []
     try:
         fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa (deje en blanco para usar 01/01/2000): ")
@@ -360,53 +322,89 @@ def consultar_por_periodo(notas):
         if fecha_final < fecha_inicial:
             print("La fecha final debe ser igual o posterior a la fecha inicial.")
             return        
-        
     except ValueError:
         print("Fecha ingresada inválida.")
         return
-    
-    total_monto = 0
-    count_notas = 0
+    while True:
+        try: 
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                #ESTRAER FECHAS CON UN SELECT, CONVERTIRLAS Y DESPUES COMPARALAS, GUARDAR ID
+                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
+                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
+                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
+                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=False")#PENDIENTE LO DE LAS FECHAS 
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("NOTAS ENCONTRADAS:\n")
+                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
+                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
+                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
+                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
+        print("Desea preservar los datos en un archivo")
+        print("1. Exportar a excel")
+        print("2. Exportar a csv")
+        print("3. Regresar al menu de consltas")
+        opcion=int(input("Elija la opcion: "))
+        if opcion==1:
+            exportar_a_excel()
+        elif opcion==2:
+            exportar_a_csv()
+        elif opcion==3:
+            sub_menu_consultas()
 
-    for nota in notas:
-        if fecha_inicial <= nota['Fecha'] <= fecha_final and nota['Estatus']==False:
-            total_monto += nota['Monto_pago']
-            count_notas += 1
-            notas_periodo.append(nota)
-        if not notas_periodo:
-            print("No hay notas registradas para el período especificado.")
-    else:
-        promedio_monto = total_monto / count_notas if count_notas > 0 else 0
-        print("Reporte de notas para el período especificado: ")
-        print("Folio\tFecha\tNombre\tCosto")
-        for nota in notas_periodo:
-            print(f"{nota['Folio']}\t{nota['Fecha']}\t{nota['Cliente']}\t{nota['Monto_pago']:.2f}")
-        print(f"\nMonto promedio de las notas en el período: {promedio_monto:.2f}")
-    sub_menu_consultas(notas)
-
-def consultar_por_folio(notas):
+def consultar_por_folio():
     folio =int(input("Ingrese el folio de la nota: "))
-    nota_encontrada=False
-    for nota in notas:    
-        if nota['Folio'] == folio and nota['Estatus']==False:
-            print("\nDetalle de la nota:\n")
-            print(f"Folio: {nota['Folio']}\n")
-            print(f"Fecha: {nota['Fecha']}\n")
-            print(f"Nombre del cliente: {nota['Cliente']}\n")
-            print(f"RFC: {nota['RFC']}\n")
-            print(f"Servicio: {nota['Detalles']}\n")
-            print(f"Costo del servicio: {nota['Monto_pago']}")
-            nota_encontrada=True
-            break
-    if not nota_encontrada:
-        print("No se encontró una nota válida para el folio ingresado.")
-    sub_menu_consultas(notas)
-
+    while True:
+        try: 
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                valores={"folio":folio}
+                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
+                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
+                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
+                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.folio=:folio AND NOTAS.estatus=False", valores) 
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("NOTAS ENCONTRADAS:\n")
+                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
+                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
+                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
+                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
+        print("Desea preservar los datos en un archivo")
+        print("1. Exportar a excel")
+        print("2. Exportar a csv")
+        print("3. Regresar al menu de consltas")
+        opcion=int(input("Elija la opcion: "))
+        if opcion==1:
+            exportar_a_excel()
+        elif opcion==2:
+            exportar_a_csv()
+        elif opcion==3:
+            sub_menu_consultas()   
 ##función para ordenar rfc 
 def RFC_ORDENADO(RFC):
     return RFC['RFC']
 #función para consultar por cliente
-def consultar_por_rfc(notas):
+def consultar_por_rfc():
     rfc_ordenado=sorted(notas, key=RFC_ORDENADO)
     for nota in rfc_ordenado:
         if nota["Estatus"]==False:
@@ -439,250 +437,261 @@ def consultar_por_rfc(notas):
             print("No se encontró una nota válida para el folio ingresado.")
 
 #función para cancelar notas
-def cancelar_nota(notas):
-    folio = int(input("Ingrese el folio de la nota a cancelar: "))
-    nota_encontrada=False
-    for nota in notas:
-        if nota['Folio'] == folio and nota['Estatus']==False:
-            print("\nDetalle de la nota a cancelar:\n")
-            print(f"Folio: {nota['Folio']}\n")
-            print(f"Fecha: {nota['Fecha']}\n")
-            print(f"Nombre del cliente: {nota['Cliente']}\n")
-            print(f"RFC: {nota['RFC']}\n")
-            print(f"Tipo de servicio: {nota['Detalles']}\n")
-            print(f"Costo del servicio: {nota['Monto_pago']}\n")
-            confirmacion = input("¿Desea confirmar la cancelación de esta nota? (si/no): ")
-            if confirmacion.lower() == 'si':
-                nota['Estatus'] = True
-                print("Nota cancelada con éxito.")
-                nota_encontrada=True
-                return notas
-            print("\nVolviendo al menu ")
-    if not nota_encontrada:
-        print("No se encontró una nota válida para el folio ingresado.")
-        print("\nVolviendo al menu ")
+def cancelar_nota():
+    while True:
+        try: 
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                valores={"folio":folio}
+                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
+                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
+                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
+                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=False", valores)#PENDIENTE LO DE LAS FECHAS 
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("NOTAS ENCONTRADAS:\n")
+                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
+                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
+                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
+                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                
+                print("¿Desea cancelar una nota?")
+                cancelar=input()
+                if cancelar.upper=="SI":
+                    cancelar_folio=int(input("Ingrese el folio: "))
+                    values={"folio":cancelar_folio}
+                    mi_cursor.execute("UPDATE NOTAS SET estatus=True WHERE folio=:folio", values)
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
 
-#función para recuperar una nota cancelada
-def recuperar_nota_cancelada(notas):
-    print("\nNotas canceladas disponibles:")
-    print("Folio\tNombre")
-    for nota in notas:
-        if nota["Estatus"]==True:
-            print(f"{nota['Folio']}\t{nota['Cliente']}\n")
-    try:
-        folio_recuperar =int(input("Ingrese el folio de la nota cancelada que desea recuperar (o 'no' para cancelar): "))
-    except ValueError:
-        print("\nVolviendo al menu ")
-        return None
+def recuperar_nota_cancelada():
+    while True:
+        try: 
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
+                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
+                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
+                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=True")
+                clientes = mi_cursor.fetchall()
+                if clientes:
+                    print("NOTAS ENCONTRADAS:\n")
+                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
+                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
+                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
+                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                
+                print("¿Desea cancelar una nota?")
+                cancelar=input()
+                if cancelar.upper=="SI":
+                    cancelar_folio=int(input("Ingrese el folio: "))
+                    values={"folio":cancelar_folio}
+                    mi_cursor.execute("UPDATE NOTAS SET estatus=False WHERE folio=:folio", values)
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
     
-    for nota in notas:
-        if nota['Folio'] == folio_recuperar:
-            print("\nDetalle de la nota cancelada a recuperar:")
-            print(f"Folio: {nota['Folio']}")
-            print(f"Nombre del cliente: {nota['Cliente']}")
-            print(f"RFC: {nota['RFC']}\n")
-            print(f"Tipo de servicio: {nota['Detalles']}")
-            print(f"Costo del servicio: {nota['Monto_pago']}")
-            confirmacion = input("¿Desea confirmar la recuperación de esta nota cancelada? (SI/NO): ")
-            if confirmacion.lower() == "si":
-                print("La nota fue recuperada con éxito")
-                nota['Estatus']=False
-                return notas 
-            else:
-                return None
-            
-    print("No se encontró una nota cancelada válida para el folio ingresado.")
-    print("\nVolviendo al menu ")
-    return None
-
-"""# Comprobar la existencia del archivo CSV
-if comprobar_existencia_archivo():
-    notas=leer_datos_desde_csv()
-    print("Se ha recuperado el estado de la aplicación a partir del archivo CSV.")
-    print("Datos recuperados:")
-    for nota in notas:
-        if nota["Estatus"]==False:
-            print("Notas vigentes: \n ", nota)
-        elif nota["Estatus"]==True:
-            print("Notas canceladas: \n ", nota)
-else:
-    print("No se ha encontrado un  CSV existente.")
-    print("Se parte de un estado inicial vacío.")"""
-    
-##########################SERVICIOS#################################
 
 def menu_reportes_servicios():
     while True:
         print("\n--- Menú de Consultas y Reportes de Servicios ---")
         print("1. Consultas por clave de servicio")
         print("2. Consultas por nombre de servicio")
-        print("3. Reportes ordenados por clave de servicio")
-        print("4. Reportes ordenados por nombre de servicio")
-        print("5. Volver al menú de servicios")
-        opcion = input("Seleccione una opción: ")
+        print("3. Listado de servicios")
+        print("4. Volver al menú de servicios")
+        opcion = int(input("Seleccione una opción: "))
 
-        if opcion == "1":
-            # Lógica para la consulta por clave de servicio
+        if opcion ==1:
             buscar_por_clave_servicio()
-        elif opcion == "2":
-            # Lógica para la consulta por nombre de servicio
+        elif opcion ==2:
             buscar_por_nombre_servicio()
-        elif opcion == "3":
-            # Lógica para reportes ordenados por clave de servicio
-            generar_reporte_servicios_por_clave()
-        elif opcion == "4":
-            # Lógica para reportes ordenados por nombre de servicio
-            generar_reporte_servicios_por_nombre()
-        elif opcion == "5":
-            menu_principal
-            break
+        elif opcion ==3:
+            print("\n--- Menú de listado de Servicios ---")
+            print("1. Listado de servicios ordenados por clave")
+            print("2. Listado de servicios ordenados por nombre") 
+            listado_opcion=int(input("Seleccione una opción: "))  
+            if listado_opcion==1:
+                generar_reporte_servicios_por_clave()
+            elif listado_opcion==2:
+                generar_reporte_servicios_por_nombre()
+        elif opcion ==4:
+            menu_servicios()
+            break #enduda
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
-def agregar_servicios(servicios):
-    #clave unica que tiene que ser generada automaticamente id_servicio
+
+def agregar_servicios():
     while True:
             try:
                 nombre_servicio = input("Ingrese el nombre del servicio (no puede quedar vacío): ")
-                if not nombre_servicio.strip():
+                if nombre_servicio.strip()=="":
                     print("El nombre del servicio no puede estar vacío. Intente nuevamente.")
-                    continue
                 
                 costo = float(input("Ingrese el costo del servicio (debe ser superior a 0.00): "))
                 if costo <= 0.00:
                     print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
-                    continue
 
-                # Insertara los datos en la tabla
-                conn = sqlite3.connect('BD_TALLER_MECANICO.db')
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO) VALUES (?, ?, ?, ?)", (nombre_servicio, costo))
-                conn.commit()
-                print("Servicio agregado con éxito.")
-                break
+                valores=(nombre_servicio, costo)
+                with sqlite3.connect('BD_TALLER_MECANICO.db') as conn:
+                    mi_cursor = conn.cursor()
+                    mi_cursor.execute("INSERT INTO SERVICIOS (nombre_servicio, costo_servicio) VALUES (?, ?)", (valores))
+                    conn.commit() ##algoahi
+                    print("Servicio agregado con éxito.")
+                    menu_servicios()
+                    break #necesario?
             except ValueError:
                 print("Error: Ingrese un valor numérico válido para el costo.")
-
+            except Error as e:
+                print(e)
+            except:
+                print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
             conn.close()
 
+
 def buscar_por_clave_servicio():
-    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
-    cursor = conn.cursor()
-
-    # Mostrar el listado tabular de claves y nombres de servicio mediante sentencia select
-    cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS")
-    servicios = cursor.fetchall()
-
-    # Imprimir el listado tabular
-    print("Listado de servicios:\n")
-    print("Clave \t Nombre de servicio")
-    for servicio in servicios:
-        print(f"{servicio[0]} \t {servicio[1]}")
-
-    # Pedir al usuario que elija una clave
     while True:
         try:
-            clave_elegida = int(input("\nElija una clave de servicio: "))
-            break
-        except ValueError:
-            print("Ingrese un valor numérico para la clave.")
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute(("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS"))
+                servicios = mi_cursor.fetchall()
+                if servicios:
+                    print("Listado de servicios:\n")
+                    print("Clave \t Nombre de servicio")
+                    for id_servicio, nombre_servicio in servicios:
+                        print(f"\n{id_servicio} \t {nombre_servicio}")
+                else: 
+                    print("No se encontraron coincidencias")
+                    menu_reportes_servicios()
+        
+                clave_elegida = int(input("\nElija una clave de servicio: "))
+                valores={"id_servicio": clave_elegida}
+                mi_cursor.execute("SELECT * FROM SERVICIOS WHERE id_servicio = :id_servicio?", valores)
+                registro=mi_cursor.fetchall()
 
-    # Se realiza la consulta select para obtener el detalle del servicio asociado con esa clave
-    cursor.execute("SELECT * FROM SERVICIOS WHERE ID_SERVICIO=?", (clave_elegida,))
-    servicio_elegido = cursor.fetchone()
-
-    # Imprimir el detalle del servicio
-    if servicio_elegido:
-        print("\nDetalle del servicio:\n")
-        print(f"Clave: {servicio_elegido[0]}")
-        print(f"Nombre de servicio: {servicio_elegido[1]}")
-        print(f"Costo: {servicio_elegido[2]}")
-    else:
-        print("No se encontró ningún servicio con la clave ingresada.")
-
-    conn.close()
+                if registro:
+                    print("\nDetalle del servicio:\n")
+                    for id_servicio, nombre_servicio, costo_servicio in registro:
+                        print(f"\n Clave del servicio: {id_servicio}")
+                        print(f"\n Nombre del servicio: {nombre_servicio}")
+                        print(f"\n COsto del servicio: {costo_servicio}")
+                else:
+                    print("No se encontró ningún servicio con la clave ingresada.")
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
 
 def buscar_por_nombre_servicio():
-    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
-    cursor = conn.cursor()
-
-    # Pedir al usuario que ingrese el nombre del servicio a buscar
     nombre_servicio_buscar = input("Ingrese el nombre del servicio a buscar: ")
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute("SELECT * FROM SERVICIOS WHERE UPPER(NOMBRE_SERVICIO) = UPPER(?)",nombre_servicio_buscar)
+                servicios_encontrados = mi_cursor.fetchall()
 
-    # Realizar la consulta SELECT con el filtro de nombre de servicio (ignorando mayúsculas y minúsculas)
-    cursor.execute("SELECT * FROM SERVICIOS WHERE UPPER(NOMBRE_SERVICIO) = UPPER(?)", (nombre_servicio_buscar,))
-    servicios_encontrados = cursor.fetchall()
-
-    # Imprimir el reporte de detalles de los servicios encontrados
-    if servicios_encontrados:
-        print("\nDetalle del servicio/es encontrado/s:\n")
-        for servicio in servicios_encontrados:
-            print(f"Clave: {servicio[0]}")
-            print(f"Nombre de servicio: {servicio[1]}")
-            print(f"Costo: {servicio[2]}\n")
-    else:
-        print(f"No se encontró ningún servicio con el nombre '{nombre_servicio_buscar}'.")
-    conn.close()
+                if servicios_encontrados:
+                    print("\nDetalle del servicio/es encontrado/s:\n")
+                    for id_servicio, nombre_servicio, costo_servicio in servicios_encontrados:
+                        print(f"Clave: {id_servicio}")
+                        print(f"Nombre de servicio: {nombre_servicio}")
+                        print(f"Costo: {costo_servicio}\n")
+                else:
+                    print(f"No se encontró ningún servicio con el nombre '{nombre_servicio_buscar}'.")
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
 
 def generar_reporte_servicios_por_clave():
-    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
-    cursor = conn.cursor()
-
-    # Realizar la consulta SELECT para obtener todos los servicios ordenados por clave
-    cursor.execute("SELECT * FROM SERVICIOS ORDER BY id_servicio")
-    servicios = cursor.fetchall()
-
-    # Imprimir el reporte tabular en la consola
-    print("\nReporte de servicios ordenados por clave:\n")
-    print("Clave \t Nombre de servicio \t Costo")
-    for servicio in servicios:
-        print(f"{servicio[0]} \t {servicio[1]} \t {servicio[2]}")
-
-    # Pedir al usuario que elija una opción
     while True:
-        opcion = input("\nElija una opción: Exportar a CSV (1), Exportar a Excel (2), o Regresar al menú de reportes (3): ")
-        if opcion == '1':
-            exportar_a_csv(servicios, "ReporteServiciosPorClave")
-            break
-        elif opcion == '2':
-            exportar_a_excel(servicios, "ReporteServiciosPorClave")
-            break
-        elif opcion == '3':
-            break
-        else:
-            print("Opción no válida. Intente nuevamente.")
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute("SELECT * FROM SERVICIOS ORDER BY id_servicio")
+                servicios = mi_cursor.fetchall()
 
-    conn.close()
+                if servicios:
+                    print("\nReporte de servicios ordenados por clave:\n")
+                    print("Clave \t Nombre de servicio \t Costo")
+                    for id_servicio, nombre_servicio, costo_servicio in servicios:
+                        print(f"\n{id_servicio} \t {nombre_servicio} \t {costo_servicio}")
+
+                    while True:
+                        print("1. Exportar a CSV  \n2. Exportar a Excel  \n3. Regresar al menú de reportes")
+                        opcion = input("\nElija una opción: ")
+                        if opcion == '1':
+                            exportar_a_csv(servicios, "ReporteServiciosPorClave")
+                            break
+                        elif opcion == '2':
+                            exportar_a_excel(servicios, "ReporteServiciosPorClave")
+                            break
+                        elif opcion == '3':
+                            menu_reportes_servicios()
+                            break
+                        else:
+                            print("Opción no válida. Intente nuevamente.")
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
+
 
 def generar_reporte_servicios_por_nombre():
-    conn = sqlite3.connect('BD_TALLER_MECANICO.db')
-    cursor = conn.cursor()
-
-    # Realizar la consulta SELECT para obtener todos los servicios ordenados por nombre
-    cursor.execute("SELECT * FROM SERVICIOS ORDER BY nombre_servicio")
-    servicios = cursor.fetchall()
-
-    # Imprimir el reporte tabular en la consola
-    print("\nReporte de servicios ordenados por clave:\n")
-    print("Clave \t Nombre de servicio \t Costo")
-    for servicio in servicios:
-        print(f"{servicio[0]} \t {servicio[1]} \t {servicio[2]}")
-
-    # Pedir al usuario que elija una opción
     while True:
-        opcion = input("\nElija una opcion: Exportar a CSV (1), Exportar a Excel (2), o Regresar al menú de reportes (3): ")
-        if opcion == '1':
-            exportar_a_csv(servicios, "ReporteServiciosPorClave")
-            break
-        elif opcion == '2':
-            exportar_a_excel(servicios, "ReporteServiciosPorClave")
-            break
-        elif opcion == '3':
-            break
-        else:
-            print("Opción no válida. Intente nuevamente.")
+        try:
+            conn = sqlite3.connect('BD_TALLER_MECANICO.db')
+            cursor = conn.cursor()
 
-    conn.close()
+            cursor.execute("SELECT * FROM SERVICIOS ORDER BY nombre_servicio")
+            servicios = cursor.fetchall()
+
+            if servicios:
+                print("\nReporte de servicios ordenados por clave:\n")
+                print("Clave \t Nombre de servicio \t Costo")
+                for servicio in servicios:
+                    print(f"{servicio[0]} \t {servicio[1]} \t {servicio[2]}")
+
+                while True:
+                    opcion = input("\n \nElija una opcion: 1. Exportar a CSV \n2. Exportar a Excel \n3. Regresar al menú de reportes: ")
+                    if opcion == '1':
+                        exportar_a_csv(servicios, "ReporteServiciosPorClave")
+                        break
+                    elif opcion == '2':
+                        exportar_a_excel(servicios, "ReporteServiciosPorClave")
+                        break
+                    elif opcion == '3':
+                        break
+                    else:
+                        print("Opción no válida. Intente nuevamente.")
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
+
 
 def exportar_a_csv(datos, nombre_archivo):
     df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
@@ -691,12 +700,14 @@ def exportar_a_csv(datos, nombre_archivo):
     df.to_csv(nombre_archivo, index=False)
     print(f"Datos exportados a {nombre_archivo}")
 
+
 def exportar_a_excel(datos, nombre_archivo):
     df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
     timestamp = datetime.now().strftime("%m_%d_%Y")
     nombre_archivo += f"_{timestamp}.xlsx"
     df.to_excel(nombre_archivo, index=False)
     print(f"Datos exportados a {nombre_archivo}")
+
 
 def menu_servicios():
     while True:
@@ -707,36 +718,34 @@ def menu_servicios():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
-            agregar_servicios(servicios)
+            agregar_servicios()
         elif opcion == "2":
             menu_reportes_servicios()
         elif opcion == "3":
-            menu_principal(notas,clientes,servicios)
-            break
+            menu_principal()
+            break ##necesario?
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
-def menu_principal(notas,clientes,servicios):
+
+def menu_principal():
     while True:
         print("\n--- Menú Taller Mecánico ---")
         print("1. Notas")
         print("2. Clientes")
         print("3. Servicios")
         print("4. Salir")
-        op=input("Por favor escoja una opción: ")
-        if op == "1":
-            menu_notas(notas, clientes, servicios)
-        elif op == "2":
-            print("In development") #COLOCAR MENU CLIENTES
-        elif op == "3":
-            menu_servicios(servicios)
-        elif op == "4":
+        op=int(input("Por favor escoja una opción: "))
+        if op == 1:
+            menu_notas()
+        elif op == 2:
+            menu_clientes()
+        elif op == 3:
+            menu_servicios()
+        elif op == 4:
             print("Saliendo del programa...")
             break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
-notas = list()
-clientes = list()
-servicios = list()
-menu_principal(notas,clientes,servicios)
+menu_principal()
