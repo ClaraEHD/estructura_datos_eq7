@@ -8,16 +8,16 @@ try:
         mi_cursor=conn.cursor()
         mi_cursor.execute("PRAGMA foreign_keys = 1")
         mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-            CLIENTES (RFC TEXT NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, correo TEXT);")
+            CLIENTES (clave_cliente INTEGER NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, RFC TEXT NOT NULL,  correo TEXT);")
         print("Tabla clientes creada")
         mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
             SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL);")
         print("Tabla servicios creada")
         mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-            NOTAS (FOLIO INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_promedio INTEGER NOT NULL, monto_pago INTEGER NOT NULL, RFC TEXT NOT NULL, FOREIGN KEY (RFC) REFERENCES CLIENTES(RFC));")
+            NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_promedio INTEGER NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente));")
         print("Tabla creada")
         mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-            SERVICIOS_NOTAS (folio INTEGER NOT NULL PRIMARY KEY, ID_SERVICIO INTEGER NOT NULL,  FOREIGN KEY (folio) REFERENCES NOTAS(folio),  FOREIGN KEY (ID_SERVICIO) REFERENCES SERVICIOS(ID_SERVICIO))")
+            SERVICIOS_NOTAS (folio INTEGER NOT NULL PRIMARY KEY, id_servicio INTEGER NOT NULL,  FOREIGN KEY (folio) REFERENCES NOTAS(folio),  FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_servicio))")
         print("Tabla creada")
 
 except Error as e:
