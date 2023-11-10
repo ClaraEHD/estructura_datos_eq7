@@ -13,13 +13,13 @@ def crear_tablas():
             mi_cursor=conn.cursor()
             mi_cursor.execute("PRAGMA foreign_keys = 1")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                CLIENTES (clave_cliente INTEGER NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, RFC TEXT NOT NULL,  correo TEXT);")
+                CLIENTES (clave_cliente INTEGER NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, RFC TEXT NOT NULL, correo TEXT, estatus INT NOT NULL);")
             print("Tabla clientes creada")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL);")
+                SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL, estatus INT NOT NULL);")
             print("Tabla servicios creada")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
+                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus INT NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
                               id_servicio INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente),FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_Servicio));")
             print("Tabla de notas creada")
 
@@ -29,6 +29,7 @@ def crear_tablas():
         print(f'Se produjo el siguiente error: {sys.exc_info()[0]}')
     conn.commit()
     conn.close()
+
 def menu_principal():
     while True:
         print("\n--- Menú Taller Mecánico ---")
@@ -72,11 +73,11 @@ def menu_notas():
         elif opcion == 5:
             confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
             if confirmacion_salida.lower() == 'si':
-                print("Saliendo del menu de las notas")
+                print("¡Hasta luego!")
                 break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
-
+#---------------------------------------------------------------------------------------
 def insertar_notas():
     while True:
         try:
@@ -135,7 +136,7 @@ def insertar_notas():
                 with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                     mi_cursor=conn.cursor()
                     while True:
-                        cliente_clave_ingreso=input("Ingrese la clave del cliente: ")
+                        cliente_clave_ingreso=int(input("Ingrese la clave del cliente: "))
                         if cliente_clave_ingreso:
                             valores_clie={"clave_cliente":cliente_clave_ingreso}
                             mi_cursor.execute("SELECT clave_cliente FROM CLIENTES WHERE clave_cliente=:clave_cliente", valores_clie)
@@ -148,7 +149,7 @@ def insertar_notas():
                         else:
                             print("No se puede dejar vacío")
                     while True:
-                        servicio_clave_ingreso=input("Ingrese la clave del servicio realizado: ")
+                        servicio_clave_ingreso=int(input("Ingrese la clave del servicio realizado: "))
                         if servicio_clave_ingreso:
                             valores_ser={"id_servicio":servicio_clave_ingreso}
                             mi_cursor.execute("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores_ser)
@@ -169,7 +170,7 @@ def insertar_notas():
                 conn.close()
 
             nota["Fecha"] = fecha
-            nota["Estatus"] = False
+            nota["Estatus"] = 1
             nota["Monto_pago"] = costo_servicio_insertar
             nota["clave_cliente"] = clave_cliente
             nota["id_servicio"]=clave_servicio
@@ -194,25 +195,24 @@ def cancelar_nota():
         try: 
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor=conn.cursor()
-                valores={"folio":folio}
-                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
-                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
-                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
-                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=False", valores)#PENDIENTE LO DE LAS FECHAS 
-                clientes = mi_cursor.fetchall()
-                if clientes:
+                mi_cursor.execute("SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago\
+                                   FROM NOTAS N INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente INNER JOIN SERVICIOS S ON \
+                                    N.id_servicio=S.id_servicio WHERE N.estatus=1")
+                notas = mi_cursor.fetchall()
+                if notas:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
-                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
-                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
-                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                    print("Folio \t Fecha \t Clave del cliente \t Cliente \t RFC\
+                          \tCorreo \tid_servicio \tNombre del servicio\
+                          \tCosto del servicio \tMonto de pago total")
+                    for Folio, Fecha, Clave_c, Nombre_c, rfc, Correo, id_servicio,n_servicio ,c_servicio , monto_p in notas:
+                        print(f"\n{Folio} \t{Fecha} \t{Clave_c} \t{Nombre_c} \t{rfc} \t{Correo} \t{id_servicio} \t{n_servicio} \t{c_servicio}\t {monto_p}")
                 
-                print("¿Desea cancelar una nota?")
-                cancelar=input()
-                if cancelar.upper=="SI":
-                    cancelar_folio=int(input("Ingrese el folio: "))
-                    values={"folio":cancelar_folio}
-                    mi_cursor.execute("UPDATE NOTAS SET estatus=True WHERE folio=:folio", values)
+                    print("¿Desea cancelar una nota?")
+                    cancelar=input()
+                    if cancelar.upper=="SI":
+                        cancelar_folio=int(input("Ingrese el folio: "))
+                        values={"folio":cancelar_folio}
+                        mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
                 else: 
                     print("No se encontraron coincidencias")
                     menu_reportes_servicios()
