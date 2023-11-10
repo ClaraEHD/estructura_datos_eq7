@@ -19,12 +19,10 @@ def crear_tablas():
                 SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL);")
             print("Tabla servicios creada")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_promedio INTEGER NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente));")
-            print("Tabla creada")
-            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                SERVICIOS_NOTAS (folio INTEGER NOT NULL PRIMARY KEY, id_servicio INTEGER NOT NULL,  FOREIGN KEY (folio) REFERENCES NOTAS(folio),  FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_servicio))")
-            print("Tabla creada")
-    
+                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_promedio INTEGER NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
+                              id_servicio INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente),FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_Servicio));")
+            print("Tabla de notas creada")
+
     except Error as e:
         print(e)
     except Exception:
