@@ -56,19 +56,19 @@ def menu_notas():
     while True:
         print("\n--- Menú Taller Mecánico ---")
         print("1. Registrar una nota")
-        print("2. Consultas y reportes")
-        print("3. Cancelar una nota")
-        print("4. Recuperar una nota")
-        print("5. Salir")
+        print("2. Cancelar una nota")
+        print("3. Recuperar una nota")
+        print("4. Consultas y reportes")
+        print("5. Volver al menú principal")
         opcion=int(input("Ingrese una opción: "))
         if opcion == 1:
             insertar_notas()
-        elif opcion ==2:
-            menu_consultas_notas()
-        elif opcion == 3:
+        elif opcion ==2:            
             cancelar_nota()
+        elif opcion == 3:
+            recuperar_nota_cancelada()    
         elif opcion == 4:
-            recuperar_nota_cancelada()
+            menu_consultas_notas()
         elif opcion == 5:
             confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
             if confirmacion_salida.lower() == 'si':
