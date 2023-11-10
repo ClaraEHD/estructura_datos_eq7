@@ -19,7 +19,7 @@ def crear_tablas():
                 SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL);")
             print("Tabla servicios creada")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_promedio INTEGER NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
+                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus TEXT NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
                               id_servicio INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente),FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_Servicio));")
             print("Tabla de notas creada")
 
@@ -72,7 +72,7 @@ def menu_notas():
         elif opcion == 5:
             confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
             if confirmacion_salida.lower() == 'si':
-                print("¡Hasta luego!")
+                print("Saliendo del menu de las notas")
                 break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
@@ -129,67 +129,65 @@ def insertar_notas():
                    print("Ingrese una fecha válida")  
             except ValueError:
                 print("Ingrese una fecha válida")    
-
+        
         while True:
-            cliente_clave=int(input("Ingrese la clave del cliente: "))
-            if cliente_clave==False:
-                print("No puede dejar el campo vacío") ##arreglar la 
-            if cliente_clave==True:
-                break
-
-        monto_pago = 0
-        detalle = ""
-        cant_servicios=0
-
-        while True:
-            servicio_clave=input("Ingrese la clave del servicio realizado (0 para cancelar): ") #Ingresar mas de un servicio
-            if servicio_clave==0:
-                break
-            valores={"id_servicio":servicio_clave}
-            costo_servicio=("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores)
-            servicio=("SELECT nombre_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores)
-
-            monto_pago+=costo_servicio 
-            sum_detalle=f"Servicio: {servicio}, Costo: {costo_servicio} \n"
-            detalle+=sum_detalle
-            cant_servicios+=1
-            nombre_id_servicio=f"id_servicio{cant_servicios}"
-            servicio[nombre_id_servicio]=servicio_clave
-                
-        promedio_monto=monto_pago/cant_servicios
-                
-
-            #nota["Folio"] = folio_num
-        nota["Fecha"] = fecha
-        nota["Estatus"] = False
-        nota["Promedio_monto"]=promedio_monto
-        nota["Monto_pago"] = monto_pago
-        nota["clave_cliente"] = cliente_clave
-        notas.append(nota)
-        servicios_notas=list(servicio.values())
-
-
-#insersión de datos en las notas
-        try:
-                with sqlite3.connect("PrimerIntentoDemo.db") as conn:
-                    mi_cursor = conn.cursor()
-                    mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_promedio, monto_pago, clave_cliente)\
-                                      (:Fecha,:Estatus,:Promedio_monto,:Monto_pago,:clave_cliente')",notas)
-                    print(f"Datos insertados conrrectamente \nEl folio de la nota es {mi_cursor.lastrowid}")
-                  ##  folio={"FOLIO":mi_cursor.lastrowid}
-                  ##  folio_servicio=("SELECT FOLIO FROM NOTAS WHERE FOLIO=:FOLIO",folio)
-                    folio=mi_cursor.lastrowid
-                    for servicio in servicios_notas:
-                        valores=(folio, servicios_notas)
-                        mi_cursor.execute("INSERT INTO SERVICIOS_NOTAS (folio, ID_SERVICIO) \
-                        VALUES(?,?)",valores)
-                    print(f"La clave asignada a la nota fue {folio}")
-        except Error as e:
+            try:
+                with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                    mi_cursor=conn.cursor()
+                    while True:
+                        cliente_clave_ingreso=input("Ingrese la clave del cliente: ")
+                        if cliente_clave_ingreso:
+                            valores_clie={"clave_cliente":cliente_clave_ingreso}
+                            mi_cursor.execute("SELECT clave_cliente FROM CLIENTES WHERE clave_cliente=:clave_cliente", valores_clie)
+                            cliente = mi_cursor.fetchone()
+                            if cliente:
+                                clave_cliente=cliente_clave_ingreso
+                                break
+                            else:
+                                print("El cliente no está registrado")
+                        else:
+                            print("No se puede dejar vacío")
+                    while True:
+                        servicio_clave_ingreso=input("Ingrese la clave del servicio realizado: ")
+                        if servicio_clave_ingreso:
+                            valores_ser={"id_servicio":servicio_clave_ingreso}
+                            mi_cursor.execute("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores_ser)
+                            servicios = mi_cursor.fetchone()
+                            if servicios:
+                                clave_servicio=servicio_clave_ingreso
+                                costo_servicio_insertar=servicios
+                                break
+                            else:
+                                print("El servicio no existe")
+                        else:
+                            print("No se puede dejar vacío")  
+            except Error as e:
                 print (e)
-        except:
+            except Exception:
                 print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
+            finally:
                 conn.close()
+
+            nota["Fecha"] = fecha
+            nota["Estatus"] = False
+            nota["Monto_pago"] = costo_servicio_insertar
+            nota["clave_cliente"] = clave_cliente
+            nota["id_servicio"]=clave_servicio
+            notas.append(nota)
+
+            try:
+                while True:
+                    with sqlite3.connect("PrimerIntentoDemo.db") as conn:
+                        mi_cursor = conn.cursor()
+                        mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio)\
+                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio')",notas)
+                        print(f"Datos insertados correctamente \nEl folio de la nota es {mi_cursor.lastrowid}")
+            except Error as e:
+                    print (e)
+            except:
+                    print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+            finally:
+                    conn.close()
 
 def cancelar_nota():
     while True:
