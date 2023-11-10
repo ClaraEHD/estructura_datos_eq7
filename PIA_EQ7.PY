@@ -29,14 +29,14 @@ def crear_tablas():
         print(f'Se produjo el siguiente error: {sys.exc_info()[0]}')
     conn.commit()
     conn.close()
-
 def menu_principal():
     while True:
         print("\n--- Menú Taller Mecánico ---")
         print("1. Notas")
         print("2. Clientes")
         print("3. Servicios")
-        print("4. Salir")
+        print("4. Estadísticas")
+        print("5. Salir")
         op=int(input("Por favor escoja una opción: "))
         if op == 1:
             menu_notas()
@@ -44,7 +44,9 @@ def menu_principal():
             menu_clientes()
         elif op == 3:
             menu_servicios()
-        elif op == 4:
+        elif op==4:
+            menu_estadisticas()
+        elif op == 5:
             print("Saliendo del programa...")
             break
         else:
