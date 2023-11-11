@@ -957,6 +957,41 @@ def buscar_por_nombre_servicio(activos=True):
     finally:
         conn.close()
 
+def generar_reporte_servicios_por_clave():
+    while True:
+        try:
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor=conn.cursor()
+                mi_cursor.execute("SELECT * FROM SERVICIOS ORDER BY id_servicio")
+                servicios = mi_cursor.fetchall()
+
+                if servicios:
+                    print("\nReporte de servicios ordenados por clave:\n")
+                    table = PrettyTable(["Clave", "Nombre de servicio", "Costo"])
+                    for servicio in servicios:
+                        table.add_row([servicio[0], servicio[1], servicio[2]])
+                    print(table)
+
+                    while True:
+                        print("1. Exportar a CSV  \n2. Exportar a Excel  \n3. Regresar al menú de reportes")
+                        opcion = input("\nElija una opción: ")
+                        if opcion == '1':
+                            exportar_a_csv(servicios, "ReporteServiciosPorClave")
+                            break
+                        elif opcion == '2':
+                            exportar_a_excel(servicios, "ReporteServiciosPorClave")
+                            break
+                        elif opcion == '3':
+                            return
+                        else:
+                            print("Opción no válida. Intente nuevamente.")
+        except Error as e:
+            print (e)
+        except Exception:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+            conn.close()
+
 def crear_tablas():
     try:
         with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
