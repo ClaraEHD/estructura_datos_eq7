@@ -8,29 +8,6 @@ from sqlite3 import Error
 from prettytable import PrettyTable
 import sys
 
-def crear_tablas():
-    try:
-        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-            mi_cursor=conn.cursor()
-            mi_cursor.execute("PRAGMA foreign_keys = 1")
-            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                CLIENTES (clave_cliente INTEGER NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, RFC TEXT NOT NULL, correo TEXT, estatus INT NOT NULL);")
-            print("Tabla clientes creada")
-            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL, estatus INT NOT NULL);")
-            print("Tabla servicios creada")
-            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus INT NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
-                              id_servicio INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente),FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_Servicio));")
-            print("Tabla de notas creada")
-
-    except Error as e:
-        print(e)
-    except Exception:
-        print(f'Se produjo el siguiente error: {sys.exc_info()[0]}')
-    conn.commit()
-    conn.close()
-
 def menu_principal():
     while True:
         print("\n--- Menú Taller Mecánico ---")
@@ -791,6 +768,20 @@ def consultar_por_rfc():
 
 #función para cancelar notas
 
+def exportar_a_csv(datos, nombre_archivo):
+    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
+    timestamp = datetime.now().strftime("%m_%d_%Y")
+    nombre_archivo += f"_{timestamp}.csv"
+    df.to_csv(nombre_archivo, index=False)
+    print(f"Datos exportados a {nombre_archivo}")
+
+
+def exportar_a_excel(datos, nombre_archivo):
+    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
+    timestamp = datetime.now().strftime("%m_%d_%Y")
+    nombre_archivo += f"_{timestamp}.xlsx"
+    df.to_excel(nombre_archivo, index=False)
+    print(f"Datos exportados a {nombre_archivo}")
 
 def menu_reportes_servicios():
     while True:
@@ -884,24 +875,33 @@ def generar_reporte_servicios_por_nombre():
         finally:
             conn.close()
 
+def crear_tablas():
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor = conn.cursor()
+            mi_cursor.execute("PRAGMA foreign_keys = 1")
+            
+            
+            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
+                CLIENTES (clave_cliente INTEGER NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, RFC TEXT NOT NULL, correo TEXT, estatus BOOLEAN DEFAULT 1);")
 
-def exportar_a_csv(datos, nombre_archivo):
-    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
-    timestamp = datetime.now().strftime("%m_%d_%Y")
-    nombre_archivo += f"_{timestamp}.csv"
-    df.to_csv(nombre_archivo, index=False)
-    print(f"Datos exportados a {nombre_archivo}")
+            
+            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
+                SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL, estatus BOOLEAN DEFAULT 1);")
 
+            
+            mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
+                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP, estatus BOOLEAN NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INT NOT NULL,\
+                              id_servicio INT NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente), FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_servicio));")
 
-def exportar_a_excel(datos, nombre_archivo):
-    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
-    timestamp = datetime.now().strftime("%m_%d_%Y")
-    nombre_archivo += f"_{timestamp}.xlsx"
-    df.to_excel(nombre_archivo, index=False)
-    print(f"Datos exportados a {nombre_archivo}")
-
-
-
+    except Error as e:
+        print(e)
+    except Exception:
+        print(f'Se produjo el siguiente error: {sys.exc_info()[0]}')
+    conn.commit()
+    conn.close()
 
 crear_tablas()
 menu_principal()
+
+
