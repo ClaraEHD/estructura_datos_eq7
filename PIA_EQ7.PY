@@ -1,5 +1,5 @@
 import datetime
-import pandas as pd
+import pandas as PD
 import re
 import os
 import csv
@@ -1001,6 +1001,7 @@ def listado_servicios():
             print("La opcion no es valida.")
 
 def agregar_servicios():
+    conn = None
     while True:
         try:
             nombre_servicio = input("Ingrese el nombre del servicio (no puede quedar vacío): ")
@@ -1014,7 +1015,7 @@ def agregar_servicios():
                     if costo_servicio <= 0.00:
                         print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
                     else:
-                        break  # Break out of the loop if the cost is valid
+                        break  
                 except ValueError:
                     print("Error: Ingrese un valor numérico válido para el costo.")
 
@@ -1031,8 +1032,8 @@ def agregar_servicios():
         except:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
-          if conn:
-            conn.close()
+            if conn:
+               conn.close()
 
 def suspender_servicio():
     servicio = buscar_por_clave_servicio()
@@ -1260,15 +1261,15 @@ def crear_tablas():
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
                 CLIENTES (clave_cliente INTEGER NOT NULL PRIMARY KEY, cliente TEXT NOT NULL, RFC TEXT NOT NULL, correo TEXT, estatus INTEGER NOT NULL);")            
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL, estatus INTEGER NOT NULL);")
+                SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL, estatus INTEGER NOT NULL DEFAULT 1);")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
                 NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus INTEGER NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INTEGER NOT NULL,\
                               id_servicio INTEGER NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente), FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_servicio));")
+            conn.commit()
     except Error as e:
         print(e)
     except Exception:
         print(f'Se produjo el siguiente error: {sys.exc_info()[0]}')
-    conn.commit()
     conn.close()
 
 crear_tablas()
