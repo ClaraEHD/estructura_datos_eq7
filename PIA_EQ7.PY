@@ -456,7 +456,7 @@ def suspende_cliente():
 
 def recuperar_cliente():
     pass
-def menu_consultas_clientes():
+"""def menu_consultas_clientes():
     while True:
         print("\n\t--- Menú Consultas y Reportes ---")
         print("1. Listado de clientes registrados ")
@@ -474,7 +474,7 @@ def menu_consultas_clientes():
             break
         else:
             ("Opción inválida")
-
+"""
 def menu_listado_Clientes():
     print("\n\t--- Menú listado de clientes registrados ---")
     print("1. Ordenado por clave ")
@@ -501,13 +501,18 @@ def ordenar_por_clave_clientes():
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
                     opcion=int(input("1. Exportar \n2.Volver al menú de consultas"))
                     if opcion==1:
-                        pass
+                        op_Ex=(input("\n1. Exportar a execel \2. Exportar a cvs \n"))
+                        if op_Ex==1:
+                            pass
+                        elif op_Ex==2:
+                            pass
+                        break
                     elif opcion==2:
-                            menu_consultas_clientes()    
+                            menu_listado_Clientes()    
                     break       
                 else: 
                     print("No se encontraron coincidencias")
-                    menu_reportes_servicios()
+                    menu_listado_Clientes()
         except Error as e:
             print (e)
         except Exception:
@@ -527,20 +532,27 @@ def ordenar_por_nombre_clientes():
                     print("Clave \t Nombre de servicio")
                     for clave, nombre, rfc, correo  in clientes:
                         print(f"\n{clave} \t {nombre}\t {rfc}\t {correo}")
+                    print("\n¿Desea exportar el resultado o desea volver al menú?")
+                    opcion=int(input("1. Exportar \n2.Volver al menú de consultas"))
+                    if opcion==1:
+                        op_Ex=(input("\n1. Exportar a execel \2. Exportar a cvs \n"))
+                        if op_Ex==1:
+                            pass
+                        elif op_Ex==2:
+                            pass
+                        break
+                    elif opcion==2:
+                            menu_listado_Clientes()    
+                    break       
                 else: 
                     print("No se encontraron coincidencias")
-                    menu_reportes_servicios()
+                    menu_listado_Clientes()
         except Error as e:
             print (e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-
-def busqueda_clave_clientes():
-    pass
-def busqueda_nombre_clientes():
-    pass
 
 def menu_servicios():
     while True:
