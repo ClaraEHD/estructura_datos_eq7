@@ -813,14 +813,7 @@ def menu_reportes_servicios():
         elif opcion ==2:
             buscar_por_nombre_servicio()
         elif opcion ==3:
-            print("\n--- Menú de listado de Servicios ---")
-            print("1. Listado de servicios ordenados por clave")
-            print("2. Listado de servicios ordenados por nombre") 
-            listado_opcion=int(input("Seleccione una opción: "))  
-            if listado_opcion==1:
-                generar_reporte_servicios_por_clave()
-            elif listado_opcion==2:
-                generar_reporte_servicios_por_nombre()
+            listado_servicios()
         elif opcion ==4:
             menu_servicios()
             break #enduda
@@ -830,32 +823,37 @@ def menu_reportes_servicios():
 
 def agregar_servicios():
     while True:
-            try:
-                nombre_servicio = input("Ingrese el nombre del servicio (no puede quedar vacío): ")
-                if nombre_servicio.strip()=="":
-                    print("El nombre del servicio no puede estar vacío. Intente nuevamente.")
-                
-                costo = float(input("Ingrese el costo del servicio (debe ser superior a 0.00): "))
-                if costo <= 0.00:
-                    print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
+        try:
+            nombre_servicio = input("Ingrese el nombre del servicio (no puede quedar vacío): ")
+            if not nombre_servicio.strip():
+                print("El nombre del servicio no puede estar vacío. Intente nuevamente.")
+                continue
+            
+            while True:
+                try:
+                    costo_servicio = float(input("Ingrese el costo del servicio (debe ser superior a 0.00): "))
+                    if costo_servicio <= 0.00:
+                        print("El costo del servicio debe ser superior a 0.00. Intente nuevamente.")
+                    else:
+                        break  # Break out of the loop if the cost is valid
+                except ValueError:
+                    print("Error: Ingrese un valor numérico válido para el costo.")
 
-                valores=(nombre_servicio, costo)
-                with sqlite3.connect('BD_TALLER_MECANICO.db') as conn:
-                    mi_cursor = conn.cursor()
-                    mi_cursor.execute("INSERT INTO SERVICIOS (nombre_servicio, costo_servicio) VALUES (?, ?)", (valores))
-                    conn.commit() ##algoahi
-                    print("Servicio agregado con éxito.")
-                    menu_servicios()
-                    break #necesario?
-            except ValueError:
-                print("Error: Ingrese un valor numérico válido para el costo.")
-            except Error as e:
-                print(e)
-            except:
-                print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+            conn = sqlite3.connect('BD_TALLER_MECANICO.db')
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO_SERVICIO) VALUES (?, ?)", (nombre_servicio, costo_servicio))
+            conn.commit()
+            print("Servicio agregado con éxito.")
+            return
+        except ValueError:
+            print("Error: Ingrese un valor numérico válido para el costo.")
+        except Error as e:
+            print(e)
+        except:
+            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        finally:
+          if conn:
             conn.close()
-
-
 
 def generar_reporte_servicios_por_nombre():
     while True:
