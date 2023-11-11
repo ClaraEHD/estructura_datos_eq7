@@ -392,14 +392,20 @@ def menu_clientes():
     while True:
         print("\n\t--- Menú Clientes ---")
         print("1. Agregar un cliente")
-        print("2. Consultas y reportes de clientes")
-        print("3. Volver al menú anterior (Menú Principal)")
+        print("2. Suspender un cliente")
+        print("3. Recuperar un cliente")
+        print("4. Consultas y reportes de clientes")
+        print("5. Volver al menú anterior")
         eleccion=int(input("Elija una opción: "))
         if eleccion==1:
             agregar_cliente()
         elif eleccion==2:
-            menu_consultas_clientes()
+            suspende_cliente()
         elif eleccion==3:
+            recuperar_cliente()
+        elif eleccion==4:
+            menu_consultas_clientes()
+        elif eleccion==5:
             menu_principal()
         else:
             print("Opción inválida")
