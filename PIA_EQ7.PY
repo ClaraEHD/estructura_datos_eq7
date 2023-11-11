@@ -213,9 +213,12 @@ def cancelar_nota():
                         cancelar_folio=int(input("Ingrese el folio: "))
                         values={"folio":cancelar_folio}
                         mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
+                    elif cancelar.upper=="NO":
+                        print("Volviendo al menu de consultas de notas")
+                        menu_notas()
                 else: 
                     print("No se encontraron coincidencias")
-                    menu_reportes_servicios()
+                    menu_notas()
         except Error as e:
             print (e)
         except Exception:
@@ -228,34 +231,35 @@ def recuperar_nota_cancelada():
         try: 
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
-                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
-                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
-                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=True")
-                clientes = mi_cursor.fetchall()
-                if clientes:
+                mi_cursor.execute("SELECT FOLIO, FECHA, clave_cliente, id_servicio\
+                                   FROM NOTAS WHERE estatus=0")
+                notas = mi_cursor.fetchall()
+                if notas:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
-                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
-                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
-                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                    print("Folio \t Fecha \t Clave del cliente \tid_servicio")
+                    for Folio, Fecha, Clave_c, id_servicio,in notas:
+                        print(f"\n{Folio} \t{Fecha} \t{Clave_c} \t{id_servicio}")
                 
-                print("¿Desea cancelar una nota?")
-                cancelar=input()
-                if cancelar.upper=="SI":
-                    cancelar_folio=int(input("Ingrese el folio: "))
-                    values={"folio":cancelar_folio}
-                    mi_cursor.execute("UPDATE NOTAS SET estatus=False WHERE folio=:folio", values)
+                    print("¿Desea recuperar una nota?")
+                    cancelar=input()
+                    if cancelar.upper=="SI":
+                        cancelar_folio=int(input("Ingrese el folio: "))
+                        values={"folio":cancelar_folio}
+                        mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
+                        print("Nota recuperada exitosamente")
+                    elif cancelar.upper=="NO":
+                        print("La nota no fue recuperada \nVolviendo al menu de consultas de notas")
+                        menu_notas()
                 else: 
                     print("No se encontraron coincidencias")
-                    menu_reportes_servicios()
+                    menu_notas()
         except Error as e:
             print (e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-    
+
 def menu_consultas_notas():
             print("\n--- Submenú Consultas y Reportes ---")
             print("1. Consulta por período")
