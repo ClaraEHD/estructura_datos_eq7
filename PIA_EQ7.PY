@@ -1,11 +1,12 @@
-import datetime
-import pandas as PD
+import pandas as pd
 import re
+import datetime
 import os
 import csv
 import sqlite3
 from sqlite3 import Error
 from prettytable import PrettyTable
+from datetime import datetime
 import sys
 
 def menu_principal():
@@ -970,19 +971,24 @@ def RFC_ORDENADO(RFC):
 #función para cancelar notas
 
 def exportar_a_csv(datos, nombre_archivo):
-    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
-    timestamp = datetime.now().strftime("%m_%d_%Y")
-    nombre_archivo += f"_{timestamp}.csv"
-    df.to_csv(nombre_archivo, index=False)
-    print(f"Datos exportados a {nombre_archivo}")
-
+    try:
+        df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo', 'Estatus'])
+        timestamp = datetime.now().strftime("%m_%d_%Y")
+        nombre_archivo += f"_{timestamp}.csv"
+        df.to_csv(nombre_archivo, index=False)
+        print(f"Datos exportados a {nombre_archivo}")
+    except Exception as e:
+        print(f"Error al exportar a CSV: {e}")
 
 def exportar_a_excel(datos, nombre_archivo):
-    df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo'])
-    timestamp = datetime.now().strftime("%m_%d_%Y")
-    nombre_archivo += f"_{timestamp}.xlsx"
-    df.to_excel(nombre_archivo, index=False)
-    print(f"Datos exportados a {nombre_archivo}")
+    try:
+        df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo', 'Estatus'])
+        timestamp = datetime.now().strftime("%m_%d_%Y")
+        nombre_archivo += f"_{timestamp}.xlsx"
+        df.to_excel(nombre_archivo, index=False)
+        print(f"Datos exportados a {nombre_archivo}")
+    except Exception as e:
+        print(f"Error al exportar a Excel: {e}")
 
 def listado_servicios():
     while True:
