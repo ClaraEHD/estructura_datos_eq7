@@ -294,8 +294,9 @@ def menu_consultas_notas():
                 menu_principal()
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
+#pendiente consultar por periodo
 def consultar_por_periodo(): 
-    notas_periodo = []
+
     try:
         fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa (deje en blanco para usar 01/01/2000): ")
         if fecha_inicial_str.strip() == '':
@@ -313,7 +314,6 @@ def consultar_por_periodo():
             return        
     except ValueError:
         print("Fecha ingresada inválida.")
-        return
     while True:
         try: 
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
@@ -326,8 +326,7 @@ def consultar_por_periodo():
                 clientes = mi_cursor.fetchall()
                 if clientes:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
-                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
+                    print("Folio \t Fecha")
                     for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
                         print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
                 else: 
@@ -350,44 +349,42 @@ def consultar_por_periodo():
             exportar_a_csv()
         elif opcion==3:
             menu_consultas_notas()
-
+#------------------------------
 def consultar_por_folio():
-    folio =int(input("Ingrese el folio de la nota: "))
     while True:
         try: 
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor=conn.cursor()
-                valores={"folio":folio}
-                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
-                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
-                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
-                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.folio=:folio AND NOTAS.estatus=False", valores) 
-                clientes = mi_cursor.fetchall()
-                if clientes:
+                mi_cursor.execute("SELECT N.FOLIO, N.FECHA, C.cliente\
+                                   FROM NOTAS N INNER JOIN CLIENTES ON N.clave_cliente=C.clave_cliente WHERE estatus=1")
+                notas = mi_cursor.fetchall()
+                if notas:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
-                                   \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
-                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
-                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                    print("Folio \t Fecha \t Cliente")
+                    for Folio, Fecha, clietnte, in notas:
+                        print(f"\n{Folio} \t{Fecha} \t{clietnte}")
+                folio =int(input("Ingrese el folio de la nota que deasea consultar: "))
+                if folio==Folio:
+                    valores={"folio":folio}
+                    mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
+                                    CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
+                                    FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
+                                        NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.folio=:folio AND NOTAS.estatus=False", valores) 
+                    nota = mi_cursor.fetchall()
+                    if nota:
+                        print("NOTAS ENCONTRADAS:\n")
+                        print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
+                                    \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
+                        for Folio, Fecha,Clave_c, Nombre_c, rfc, Correo, monto_p, Servicio, costo_Servicio  in nota:
+                            print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {rfc}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
                 else: 
-                    print("No se encontraron coincidencias")
-                    menu_reportes_servicios()
+                    print("No se encontraron coincidencias \nVolviendo al menú de consultas")
         except Error as e:
             print (e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-        print("Desea preservar los datos en un archivo")
-        print("1. Exportar a excel")
-        print("2. Exportar a csv")
-        print("3. Regresar al menu de consltas")
-        opcion=int(input("Elija la opcion: "))
-        if opcion==1:
-            exportar_a_excel()
-        elif opcion==2:
-            exportar_a_csv()
-        elif opcion==3:
             menu_consultas_notas()   
 
 
