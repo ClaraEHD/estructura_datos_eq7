@@ -87,9 +87,10 @@ def insertar_notas():
                 clientes = mi_cursor.fetchall()
                 if clientes:
                     print("Listado de clientes:\n")
-                    print("Clave \t Nombre de servicio")
+                    print("Clave \t Nombre de cliente")
                     for clave, nombre in clientes:
                         print(f"\n{clave} \t {nombre}")
+                    break
                 else: 
                     print("No se encontraron coincidencias")
                     break
@@ -458,20 +459,32 @@ def recuperar_cliente():
 def menu_consultas_clientes():
     while True:
         print("\n\t--- Menú Consultas y Reportes ---")
-        print("Listado de Clientes Registrados")
-        print("1. Busqueda por clave")
-        print("2. Busqueda por nombre")
-        print("3. Volver al menú anterior (clientes)")
-        ##listado de clientes
+        print("1. Listado de clientes registrados ")
+        print("2. Busqueda por clave")
+        print("3. Busqueda por nombre")
+        print("4. Volver al menú anterior")
         opcion=int(input("Elija una opcion: "))
         if opcion==1:
-            ordenar_por_clave_clientes()
+            menu_listado_Clientes()
         elif opcion==2:
-            ordenar_por_nombre_clientes()
+            busqueda_clave_clientes()
+        elif opcion==3:
+            busqueda_nombre_clientes()
         elif opcion==3:
             break
         else:
             ("Opción inválida")
+
+def menu_listado_Clientes():
+    print("\n\t--- Menú listado de clientes registrados ---")
+    print("1. Ordenado por clave ")
+    print("2. Ordenado por nombre")
+    print("3. Volver al menú anterior")
+    opcion=int(input("Ingresa la opción que deseas"))
+    if opcion==1:
+        ordenar_por_clave_clientes()
+    elif opcion==2:
+        ordenar_por_nombre_clientes()
 
 def ordenar_por_clave_clientes():
     while True:
@@ -485,6 +498,13 @@ def ordenar_por_clave_clientes():
                     print("Clave \t Nombre de servicio")
                     for clave, nombre, rfc, correo  in clientes:
                         print(f"\n{clave} \t {nombre}\t {rfc}\t {correo}")
+                    print("\n¿Desea exportar el resultado o desea volver al menú?")
+                    opcion=int(input("1. Exportar \n2.Volver al menú de consultas"))
+                    if opcion==1:
+                        pass
+                    elif opcion==2:
+                            menu_consultas_clientes()    
+                    break       
                 else: 
                     print("No se encontraron coincidencias")
                     menu_reportes_servicios()
@@ -517,6 +537,10 @@ def ordenar_por_nombre_clientes():
         finally:
             conn.close()
 
+def busqueda_clave_clientes():
+    pass
+def busqueda_nombre_clientes():
+    pass
 
 def menu_servicios():
     while True:
