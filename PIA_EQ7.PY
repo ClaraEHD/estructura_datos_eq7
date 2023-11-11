@@ -5,6 +5,7 @@ import os
 import csv
 import sqlite3
 from sqlite3 import Error
+from prettytable import PrettyTable
 import sys
 
 def crear_tablas():
