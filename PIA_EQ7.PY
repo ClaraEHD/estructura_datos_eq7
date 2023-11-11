@@ -4,6 +4,7 @@ import datetime
 import os
 import csv
 import sqlite3
+import xlsxwriter
 from sqlite3 import Error
 from prettytable import PrettyTable
 from datetime import datetime
@@ -985,8 +986,12 @@ def exportar_a_excel(datos, nombre_archivo):
         df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo', 'Estatus'])
         timestamp = datetime.now().strftime("%m_%d_%Y")
         nombre_archivo += f"_{timestamp}.xlsx"
-        df.to_excel(nombre_archivo, index=False)
+
+        with pd.ExcelWriter(nombre_archivo, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False)
+
         print(f"Datos exportados a {nombre_archivo}")
+        return True
     except Exception as e:
         print(f"Error al exportar a Excel: {e}")
 
