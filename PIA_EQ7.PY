@@ -880,40 +880,54 @@ def recuperar_servicio():
                 print("Servicio recuperado exitosamente.")
         else:
             print("Operación cancelada.")
-            
-def generar_reporte_servicios_por_nombre():
-    while True:
-        try:
-            conn = sqlite3.connect('BD_TALLER_MECANICO.db')
-            cursor = conn.cursor()
 
-            cursor.execute("SELECT * FROM SERVICIOS ORDER BY nombre_servicio")
-            servicios = cursor.fetchall()
+def buscar_por_clave_servicio(activos=True):
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor = conn.cursor()
+
+            if activos:
+                mi_cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS WHERE estatus = 1")
+            else:
+                mi_cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS WHERE estatus = 0")
+            servicios = mi_cursor.fetchall()
 
             if servicios:
-                print("\nReporte de servicios ordenados por clave:\n")
-                print("Clave \t Nombre de servicio \t Costo")
+                print("\nListado de servicios:\n")
+                print("Clave \t Nombre de servicio")
                 for servicio in servicios:
-                    print(f"{servicio[0]} \t {servicio[1]} \t {servicio[2]}")
+                    print(f"{servicio[0]} \t {servicio[1]}")
+
+                if not activos:
+                    print("\n(Servicios suspendidos)")
 
                 while True:
-                    opcion = input("\n \nElija una opcion: 1. Exportar a CSV \n2. Exportar a Excel \n3. Regresar al menú de reportes: ")
-                    if opcion == '1':
-                        exportar_a_csv(servicios, "ReporteServiciosPorClave")
-                        break
-                    elif opcion == '2':
-                        exportar_a_excel(servicios, "ReporteServiciosPorClave")
-                        break
-                    elif opcion == '3':
-                        break
-                    else:
-                        print("Opción no válida. Intente nuevamente.")
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
+                    try:
+                        clave_elegida = int(input("\nElija una clave de servicio (o ingrese 0 para volver): "))
+
+                        if clave_elegida == 0:
+                            return None  # Usuario eligió volver al menú anterior
+
+                        mi_cursor.execute("SELECT * FROM SERVICIOS WHERE ID_SERVICIO = ?", (clave_elegida,))
+                        servicio_elegido = mi_cursor.fetchone()
+
+                        if servicio_elegido:
+                            print("\n Detalle del servicio:")
+                            print(f" Clave del servicio: {servicio_elegido[0]}")
+                            print(f" Nombre del servicio: {servicio_elegido[1]}")
+                            print(f" Costo del servicio: {servicio_elegido[2]}")
+
+                            return servicio_elegido
+                        else:
+                            print("No se encontró ningún servicio con la clave ingresada.")
+                    except ValueError:
+                        print("Error: Ingrese un valor numérico válido para la clave.")
+            else:
+                print("No hay servicios registrados.")
+    except Error as e:
+        print(e)
+    except Exception:
+        print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
 
 def crear_tablas():
     try:
