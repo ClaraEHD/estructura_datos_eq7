@@ -8,29 +8,6 @@ from sqlite3 import Error
 from prettytable import PrettyTable
 import sys
 
-def menu_principal():
-    while True:
-        print("\n--- Menú Taller Mecánico ---")
-        print("1. Notas")
-        print("2. Clientes")
-        print("3. Servicios")
-        print("4. Estadísticas")
-        print("5. Salir")
-        op=int(input("Por favor escoja una opción: "))
-        if op == 1:
-            menu_notas()
-        elif op == 2:
-            menu_clientes()
-        elif op == 3:
-            menu_servicios()
-        elif op==4:
-            menu_estadisticas()
-        elif op == 5:
-            print("Saliendo del programa...")
-            break
-        else:
-            print("Opción inválida. Por favor, elija una opción válida.")
-
 def menu_notas():
     while True:
         print("\n--- Menú Taller Mecánico ---")
@@ -799,28 +776,6 @@ def listado_servicios():
         else:
             print("La opcion no es valida.")
 
-def menu_reportes_servicios():
-    while True:
-        print("\n--- Menú de Consultas y Reportes de Servicios ---")
-        print("1. Consultas por clave de servicio")
-        print("2. Consultas por nombre de servicio")
-        print("3. Listado de servicios")
-        print("4. Volver al menú de servicios")
-        opcion = int(input("Seleccione una opción: "))
-
-        if opcion ==1:
-            buscar_por_clave_servicio()
-        elif opcion ==2:
-            buscar_por_nombre_servicio()
-        elif opcion ==3:
-            listado_servicios()
-        elif opcion ==4:
-            menu_servicios()
-            break #enduda
-        else:
-            print("Opción inválida. Por favor, elija una opción válida.")
-
-
 def agregar_servicios():
     while True:
         try:
@@ -1029,6 +984,69 @@ def generar_reporte_servicios_por_nombre():
         finally:
             conn.close()
 
+def menu_reportes_servicios():
+    while True:
+        print("\n--- Menú de Consultas y Reportes de Servicios ---")
+        print("1. Consultas por clave de servicio")
+        print("2. Consultas por nombre de servicio")
+        print("3. Listado de servicios")
+        print("4. Volver al menú de servicios")
+        opcion = int(input("Seleccione una opción: "))
+
+        if opcion == 1:
+            buscar_por_clave_servicio()
+        elif opcion == 2:
+            buscar_por_nombre_servicio()
+        elif opcion == 3:
+            listado_servicios()
+        elif opcion == 4:
+            return
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
+
+def menu_servicios():
+    while True:
+        print("\n--- Menú de Servicios ---")
+        print("1. Agregar un servicio")
+        print("2. Suspender un servicio")
+        print("3. Recuperar un servicio")
+        print("4. Consultas y reportes de servicios")
+        print("5. Volver al menú principal")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            agregar_servicios()
+        elif opcion == "2":
+            suspender_servicio()
+        elif opcion == "3":
+            recuperar_servicio()
+        elif opcion == "4":
+            menu_reportes_servicios()
+        elif opcion == "5":
+            return
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
+
+def menu_principal():
+    while True:
+        print("\n--- Menú Taller Mecánico ---")
+        print("1. Notas")
+        print("2. Clientes")
+        print("3. Servicios")
+        print("4. Salir")
+        op=int(input("Por favor escoja una opción: "))
+        if op == 1:
+            menu_notas()
+        elif op == 2:
+            menu_clientes()
+        elif op == 3:
+            menu_servicios()
+        elif op == 4:
+            print("Saliendo del programa...")
+            break
+        else:
+            print("Opción inválida. Por favor, elija una opción válida.")
+        
 def crear_tablas():
     try:
         with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
