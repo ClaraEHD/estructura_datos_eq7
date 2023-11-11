@@ -783,6 +783,22 @@ def exportar_a_excel(datos, nombre_archivo):
     df.to_excel(nombre_archivo, index=False)
     print(f"Datos exportados a {nombre_archivo}")
 
+def listado_servicios():
+    while True:
+        print("\n--- Menú de listado de Servicios ---")
+        print("1. Listado de servicios ordenados por clave")
+        print("2. Listado de servicios ordenados por nombre") 
+        print("3. Volver al menu anterior") 
+        listado_opcion=int(input("Seleccione una opción: "))  
+        if listado_opcion==1:
+            generar_reporte_servicios_por_clave()
+        elif listado_opcion==2:
+            generar_reporte_servicios_por_nombre()
+        elif listado_opcion==3:
+            return
+        else:
+            print("La opcion no es valida.")
+
 def menu_reportes_servicios():
     while True:
         print("\n--- Menú de Consultas y Reportes de Servicios ---")
