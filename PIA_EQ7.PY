@@ -410,18 +410,31 @@ def menu_clientes():
         else:
             print("Opción inválida")
 
+
 def agregar_cliente():
     print("Agregar Cliente: \n")
-    print("Lista de clientes activos: ")
-    
-    rfc = input("Por favor, ingrese su RFC: ")
-    validar_rfc(rfc)
-    nombre = input("Ingresa el nombre completo del cliente: ")
-    if nombre.strip()=="":
-        print("No se puede dejar el campo vacío")
-        
-    correo = input("Ingrese el correo del cliente: ")
-    validar_correo(correo)
+    while True:
+        rfc = input("Por favor, ingrese su RFC: ")
+        validar_rfc(rfc)
+        if validar_rfc(rfc):
+            break
+        else:
+            print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
+
+    while True:  
+        nombre = input("Ingresa el nombre completo del cliente: ")
+        if nombre.strip()=="":
+            print("No se puede dejar el campo vacío")
+        else: 
+            break
+
+    while True:    
+        correo = input("Ingresa un correo electrónico: ")
+        if (correo.strip()==""):
+            print("El correo no puede ser omitido")
+        elif (validar_correo(correo)):
+            break 
+            
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
