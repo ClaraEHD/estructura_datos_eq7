@@ -77,7 +77,7 @@ def menu_notas():
                 break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
-#---------------------------------------------------------------------------------------
+
 def insertar_notas():
     while True:
         try:
@@ -231,22 +231,39 @@ def recuperar_nota_cancelada():
         try: 
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT FOLIO, FECHA, clave_cliente, id_servicio\
+                mi_cursor.execute("SELECT FOLIO, FECHA, clave_cliente\
                                    FROM NOTAS WHERE estatus=0")
                 notas = mi_cursor.fetchall()
                 if notas:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente \tid_servicio")
-                    for Folio, Fecha, Clave_c, id_servicio,in notas:
-                        print(f"\n{Folio} \t{Fecha} \t{Clave_c} \t{id_servicio}")
+                    print("Folio \t Fecha \t Clave del cliente")
+                    for Folio, Fecha, Clave_c, in notas:
+                        print(f"\n{Folio} \t{Fecha} \t{Clave_c}")
                 
                     print("¿Desea recuperar una nota?")
                     cancelar=input()
                     if cancelar.upper=="SI":
                         cancelar_folio=int(input("Ingrese el folio: "))
-                        values={"folio":cancelar_folio}
-                        mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
-                        print("Nota recuperada exitosamente")
+                        print(f"Los datos de la nota con el folio {cancelar_folio} son:")
+                        mi_cursor.execute("SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago\
+                                   FROM NOTAS N INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente INNER JOIN SERVICIOS S ON \
+                                    N.id_servicio=S.id_servicio WHERE N.estatus=1")
+                        notas = mi_cursor.fetchall()
+                        if notas:
+                            print("NOTA:\n")
+                            print("Folio \t Fecha \t Clave del cliente \t Cliente \t RFC\
+                                \tCorreo \tid_servicio \tNombre del servicio\
+                                \tCosto del servicio \tMonto de pago total")
+                            for Folio, Fecha, Clave_c, Nombre_c, rfc, Correo, id_servicio,n_servicio ,c_servicio , monto_p in notas:
+                                print(f"\n{Folio} \t{Fecha} \t{Clave_c} \t{Nombre_c} \t{rfc} \t{Correo} \t{id_servicio} \t{n_servicio} \t{c_servicio}\t {monto_p}")
+                        res=input("¿Desea confirmar la cancelación?")
+                        if res.upper==("SI"):
+                            values={"folio":cancelar_folio}
+                            mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
+                            print("Nota recuperada exitosamente")
+                        elif cancelar.upper=="NO":
+                            print("La nota no fue recuperada \nVolviendo al menu de consultas de notas")
+                            menu_notas()
                     elif cancelar.upper=="NO":
                         print("La nota no fue recuperada \nVolviendo al menu de consultas de notas")
                         menu_notas()
@@ -277,7 +294,6 @@ def menu_consultas_notas():
                 menu_principal()
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
-
 def consultar_por_periodo(): 
     notas_periodo = []
     try:
