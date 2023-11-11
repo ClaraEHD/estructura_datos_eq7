@@ -855,6 +855,19 @@ def agregar_servicios():
           if conn:
             conn.close()
 
+def suspender_servicio():
+    servicio = buscar_por_clave_servicio()
+    if servicio:
+        confirmacion = input("¿Desea suspender este servicio? (s/n): ").lower()
+        if confirmacion == 's':
+            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+                mi_cursor = conn.cursor()
+                mi_cursor.execute("UPDATE SERVICIOS SET estatus = 0 WHERE ID_SERVICIO = ?", (servicio[0],))
+                conn.commit()
+                print("Servicio suspendido exitosamente.")
+        else:
+            print("Operación cancelada.")
+
 def generar_reporte_servicios_por_nombre():
     while True:
         try:
