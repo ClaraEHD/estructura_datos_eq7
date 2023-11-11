@@ -929,6 +929,34 @@ def buscar_por_clave_servicio(activos=True):
     except Exception:
         print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
 
+def buscar_por_nombre_servicio(activos=True):
+    nombre_servicio_buscar = input("Ingrese el nombre del servicio a buscar: ")
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor = conn.cursor()
+
+            filtro_estatus = "estatus = 1" if activos else "estatus = 0"
+            mi_cursor.execute(
+                f"SELECT * FROM SERVICIOS WHERE UPPER(NOMBRE_SERVICIO) = UPPER(?) AND {filtro_estatus}",
+                (nombre_servicio_buscar,),
+            )
+
+            servicios_encontrados = mi_cursor.fetchall()
+            if servicios_encontrados:
+                print("Listado de servicios:\n")
+                table = PrettyTable(["Nombre de servicio", "Clave"])
+                for servicio in servicios_encontrados:
+                    table.add_row([servicio[1], servicio[0]])
+                print(table)
+            else:
+                print(f"No se encontró ningún servicio con el nombre '{nombre_servicio_buscar}'.")
+    except Error as e:
+        print(e)
+    except Exception:
+        print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+    finally:
+        conn.close()
+
 def crear_tablas():
     try:
         with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
