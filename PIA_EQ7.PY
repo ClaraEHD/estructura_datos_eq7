@@ -443,7 +443,7 @@ def suspende_cliente():
                                    FROM CLIENTES WHERE estatus=1")
                 notas = mi_cursor.fetchall()
                 if notas:
-                    print("CLIENTES ENCONTRADAS:\n")
+                    print("CLIENTES ENCONTRADOS:\n")
                     print("Clave \t Cliente ")
                     for clave, cliente, in notas:
                         print(f"\n{clave} \t{cliente}")
@@ -459,16 +459,16 @@ def suspende_cliente():
                                 for Clave, Cliente,rfc,correo in nota:
                                     print(f"\n{Clave} \t {Cliente}\t {rfc}\t {correo}")
                                 res=input("¿Desea cancelar la nota? SI/NO ")
-                                if res.upper=='SI':
-                                    mi_cursor.execute("UPDATE CLIENTE SET estatus=0 WHERE clave_cliente=:clave_cliente", valores) 
+                                if res.upper()=="SI":
+                                    mi_cursor.execute("UPDATE CLIENTES SET estatus=0 WHERE clave_cliente=:clave_cliente", valores) 
                                     print("Cliente suspendido con éxito")
                                 else:
                                     print("Regresando al menú")
-                                    menu_consultas_clientes()                               
+                                    menu_clientes()                               
                             break
                         elif clave_c==0:
                             print("Volviendo al menú de consultas")
-                            menu_consultas_clientes()    
+                            menu_clientes()    
                         else:
                             print("Ingrese una clave válida")
                 else: 
@@ -479,7 +479,7 @@ def suspende_cliente():
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-            menu_consultas_notas()   
+            menu_clientes()   
 
   
 
@@ -508,16 +508,16 @@ def recuperar_cliente():
                                 for Clave, Cliente,rfc,correo in nota:
                                     print(f"\n{Clave} \t {Cliente}\t {rfc}\t {correo}")
                                 res=input("¿Desea cancelar la nota? SI/NO ")
-                                if res.upper=='SI':
-                                    mi_cursor.execute("UPDATE CLIENTE SET estatus=1 WHERE clave_cliente=:clave_cliente", valores) 
+                                if res.upper()=='SI':
+                                    mi_cursor.execute("UPDATE CLIENTES SET estatus=1 WHERE clave_cliente=:clave_cliente", valores) 
                                     print("Cliente recuperado con éxito")
                                 else:
                                     print("Regresando al menú")
-                                    menu_consultas_clientes()                               
+                                    menu_clientes()                               
                             break
                         elif clave_c==0:
                             print("Volviendo al menú de consultas")
-                            menu_consultas_clientes()    
+                            menu_clientes()    
                         else:
                             print("Ingrese una clave válida")
                 else: 
@@ -528,7 +528,7 @@ def recuperar_cliente():
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-            menu_consultas_notas()   
+            menu_clientes()   
 
 
 
