@@ -33,7 +33,7 @@ def menu_principal():
 
 def menu_notas():
     while True:
-        print("\n--- Menú Taller Mecánico ---")
+        print("\n--- Menú de Notas ---")
         print("1. Registrar una nota")
         print("2. Cancelar una nota")
         print("3. Recuperar una nota")
@@ -49,10 +49,7 @@ def menu_notas():
         elif opcion == 4:
             menu_consultas_notas()
         elif opcion == 5:
-            confirmacion_salida = input("¿Está seguro de que desea salir? (si/no): ")
-            if confirmacion_salida.lower() == 'si':
-                print("¡Hasta luego!")
-                break
+            return
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
@@ -194,7 +191,7 @@ def cancelar_nota():
                         print("Nota cancelada con éxito.")
                     elif cancelar == "NO":
                         print("Volviendo al menú de consultas de notas")
-                        menu_notas()
+                        return
                 else:
                     print("No se encontraron coincidencias")
                     menu_notas()
@@ -249,18 +246,18 @@ def recuperar_nota_cancelada():
                                 print("Nota recuperada exitosamente")
                             else:
                                 print("La nota no fue recuperada\nVolviendo al menú de consultas de notas")
-                                menu_notas()
+                                return
                         else:
                             print("No se encontró ninguna nota con el folio ingresado.")
-                            menu_notas()
+                            return
                     elif respuesta == "NO":
                         print("La nota no fue recuperada\nVolviendo al menú de consultas de notas")
-                        menu_notas()
+                        return
                     else:
                         print("Opción no válida. Por favor, ingrese 'SI' o 'NO'.")
                 else:
                     print("No se encontraron coincidencias")
-                    menu_notas()
+                    return
         except Error as e:
             print(e)
         except Exception:
@@ -282,7 +279,7 @@ def menu_consultas_notas():
             elif subopcion == "3":
                 consultar_por_rfc()
             elif subopcion=="4":
-                menu_principal()
+                return
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
 
@@ -343,10 +340,10 @@ def consultar_por_periodo():
                 elif opcion == 2:
                     exportar_a_csv(notas)
                 elif opcion == 3:
-                    menu_consultas_notas()
+                    return
             else:
                 print("No se encontraron coincidencias")
-                menu_reportes_servicios()
+                return
 
     except Error as e:
         print(e)
@@ -407,7 +404,7 @@ def consultar_por_folio():
     except Exception as ex:
         print(f"Se produjo el siguiente error: {ex}")
     finally:
-        menu_consultas_notas()
+        return
 
 def consultar_por_rfc():
     try:
@@ -438,9 +435,7 @@ def consultar_por_rfc():
     except Exception as ex:
         print(f"Se produjo el siguiente error: {ex}")
     finally:
-        # Optionally, you can add a return to the menu or other functionality here
-        pass
-
+        return
 
 def menu_clientes():
     while True:
@@ -449,7 +444,7 @@ def menu_clientes():
         print("2. Suspender un cliente")
         print("3. Recuperar un cliente")
         print("4. Consultas y reportes de clientes")
-        print("5. Volver al menú anterior")
+        print("5. Volver al menú principal")
         eleccion=int(input("Elija una opción: "))
         if eleccion==1:
             agregar_cliente()
@@ -460,7 +455,7 @@ def menu_clientes():
         elif eleccion==4:
            menu_consultas_clientes()
         elif eleccion==5:
-            menu_principal()
+            return
         else:
             print("Opción inválida")
 
@@ -557,7 +552,7 @@ def suspende_cliente():
                                     print("Cliente suspendido con éxito")
                                 else:
                                     print("Regresando al menú")
-                                    break
+                                    return
                             else:
                                 print("Ingrese una clave válida")
                     else:
@@ -565,6 +560,7 @@ def suspende_cliente():
 
             else:
                 print("\nNo se encontraron coincidencias\nVolviendo al menú de consultas")
+                return
     except Error as e:
         print(e)
     except Exception:
@@ -589,7 +585,7 @@ def recuperar_cliente():
                         clave_c = int(clave_c)
                         if clave_c == 0:
                             print("Volviendo al menú de consultas")
-                            break
+                            return
                         else:
                             valores = {"clave_cliente": clave_c}
                             cliente = ejecutar_query(conn, "SELECT cliente, RFC, correo FROM CLIENTES WHERE clave_cliente=:clave_cliente AND estatus=0", valores)
@@ -607,7 +603,7 @@ def recuperar_cliente():
                                     print("Cliente recuperado con éxito")
                                 else:
                                     print("Regresando al menú")
-                                    break
+                                    return
                             else:
                                 print("Ingrese una clave válida")
                     else:
@@ -615,6 +611,7 @@ def recuperar_cliente():
 
             else:
                 print("\nNo se encontraron coincidencias\nVolviendo al menú de consultas")
+                return
 
     except Error as e:
         print(e)
@@ -636,7 +633,7 @@ def menu_consultas_clientes():
         elif opcion==3:
             menu_clientes()
         elif opcion==3:
-            break
+            return
         else:
             ("Opción inválida")
 
@@ -651,7 +648,6 @@ def ordenar_por_clave_clientes():
                 if clientes:
                     print("Listado de clientes ordenados por clave:\n")
                     
-                    # Crear y mostrar la tabla
                     tabla = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
                     for clave, nombre, rfc, correo in clientes:
                         tabla.add_row([clave, nombre, rfc, correo])
@@ -668,11 +664,11 @@ def ordenar_por_clave_clientes():
                             pass  # Agrega lógica para exportar a CSV
                         break
                     elif opcion == 2:
-                        menu_clientes()
-                        break
+                        return
+                        
                 else: 
                     print("No se encontraron coincidencias")
-                    menu_clientes()
+                    return
                     break
         except Error as e:
             print(e)
@@ -712,12 +708,12 @@ def ordenar_por_nombre_clientes():
                             exportar_a_csv(clientes)
                         break
                     elif opcion == 2:
-                        menu_clientes()
-                        break
+                        return
+                        
                 else: 
                     print("No se encontraron coincidencias")
-                    menu_clientes()
-                    break
+                    return
+                    
         except Error as e:
             print(e)
         except Exception:
