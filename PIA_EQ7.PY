@@ -297,21 +297,22 @@ def consultar_por_periodo():
             return        
     except ValueError:
         print("Fecha ingresada inválida.")
+    fechas=(fecha_inicial,fecha_final)
     while True:
         try: 
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor=conn.cursor()
-                #ESTRAER FECHAS CON UN SELECT, CONVERTIRLAS Y DESPUES COMPARALAS, GUARDAR ID
-                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
-                                   CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
-                                   FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
-                                    NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=False")#PENDIENTE LO DE LAS FECHAS 
+                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, CLIENTES.cliente, CLIENTES.RFC, CLIENTES.correo, \
+                                  NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio \
+                                  FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
+                                   NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=1 AND NOTAS.fecha BETWEEN ? AND ?", fechas)
                 clientes = mi_cursor.fetchall()
                 if clientes:
                     print("NOTAS ENCONTRADAS:\n")
                     print("Folio \t Fecha")
                     for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
                         print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
+                    break
                 else: 
                     print("No se encontraron coincidencias")
                     menu_reportes_servicios()
