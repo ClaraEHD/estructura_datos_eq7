@@ -4,10 +4,8 @@ import datetime
 import os
 import csv
 import sqlite3
-import xlsxwriter
 from sqlite3 import Error
 from prettytable import PrettyTable
-from datetime import datetime
 import sys
 
 def menu_principal():
@@ -84,12 +82,12 @@ def insertar_notas():
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT * FROM SERVICIOS ORDER BY id_servicio")
+                mi_cursor.execute("SELECT id_servicio, nombre_servicio, costo_servicio FROM SERVICIOS ORDER BY id_servicio")
                 servicios = mi_cursor.fetchall()
 
                 if servicios:
                     print("\nListado de servicios disponibles:\n")
-                    print("Clave \t Nombre de servicio \t Costo")
+                    print("Clave \t Nombre de servicio \t\t Costo")
                     for id_servicio, nombre_servicio, costo_servicio in servicios:
                         print(f"\n{id_servicio} \t {nombre_servicio} \t {costo_servicio}")
         except Error as e:
@@ -132,8 +130,8 @@ def insertar_notas():
                     while True:
                         servicio_clave_ingreso=int(input("Ingrese la clave del servicio realizado: "))
                         if servicio_clave_ingreso:
-                            valores_ser={"id_servicio":servicio_clave_ingreso}
-                            mi_cursor.execute("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=:id_servicio", valores_ser)
+                            clave=(servicio_clave_ingreso,)
+                            mi_cursor.execute("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=?", clave)
                             servicios = mi_cursor.fetchone()
                             if servicios:
                                 clave_servicio=servicio_clave_ingreso
@@ -159,16 +157,17 @@ def insertar_notas():
 
             try:
                 while True:
-                    with sqlite3.connect("PrimerIntentoDemo.db") as conn:
+                    with sqlite3.connect("BDTALLER_MECANICO.db") as conn:
                         mi_cursor = conn.cursor()
                         mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio)\
-                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio')",notas)
+                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)",notas)
                         print(f"Datos insertados correctamente \nEl folio de la nota es {mi_cursor.lastrowid}")
             except Error as e:
                     print (e)
             except:
                     print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
             finally:
+                    conn.commit()
                     conn.close()
 
 def cancelar_nota():
@@ -1029,10 +1028,10 @@ def agregar_servicios():
                         break  
                 except ValueError:
                     print("Error: Ingrese un valor numérico válido para el costo.")
-
+            estatus=1
             conn = sqlite3.connect('BD_TALLER_MECANICO.db')
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO_SERVICIO) VALUES (?, ?)", (nombre_servicio, costo_servicio))
+            cursor.execute("INSERT INTO SERVICIOS (NOMBRE_SERVICIO, COSTO_SERVICIO, estatus) VALUES (?, ?, ?)", (nombre_servicio, costo_servicio, estatus))
             conn.commit()
             print("Servicio agregado con éxito.")
             return
@@ -1274,7 +1273,7 @@ def crear_tablas():
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
                 SERVICIOS (id_servicio INTEGER NOT NULL PRIMARY KEY, nombre_servicio TEXT NOT NULL, costo_servicio INTEGER NOT NULL, estatus INTEGER NOT NULL DEFAULT 1);")
             mi_cursor.execute("CREATE TABLE IF NOT EXISTS \
-                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus INTEGER NOT NULL, monto_pago INTEGER NOT NULL, clave_cliente INTEGER NOT NULL,\
+                NOTAS (folio INTEGER NOT NULL PRIMARY KEY, fecha TIMESTAMP, estatus INTEGER NOT NULL  DEFAULT 1, monto_pago INTEGER NOT NULL, clave_cliente INTEGER NOT NULL,\
                               id_servicio INTEGER NOT NULL, FOREIGN KEY (clave_cliente) REFERENCES CLIENTES(clave_cliente), FOREIGN KEY (id_servicio) REFERENCES SERVICIOS(id_servicio));")
             conn.commit()
     except Error as e:
