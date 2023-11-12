@@ -134,8 +134,12 @@ def insertar_notas():
                             mi_cursor.execute("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=?", clave)
                             servicios = mi_cursor.fetchone()
                             if servicios:
-                                clave_servicio=servicio_clave_ingreso
-                                costo_servicio_insertar=servicios
+                                for costo_servicio in servicios:
+                                    clave_servicio=servicio_clave_ingreso
+                                    costo_servicio_insertar=costo_servicio
+                                    break
+                                print(costo_servicio)
+                                print(type(costo_servicio_insertar))
                                 break
                             else:
                                 print("El servicio no existe")
@@ -150,7 +154,7 @@ def insertar_notas():
 
             nota["Fecha"] = fecha
             nota["Estatus"] = 1
-            nota["Monto_pago"] = costo_servicio_insertar
+            nota["Monto_pago"] = costo_servicio
             nota["clave_cliente"] = clave_cliente
             nota["id_servicio"]=clave_servicio
             notass.append(nota)
@@ -160,8 +164,9 @@ def insertar_notas():
                     with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                         mi_cursor = conn.cursor()
                         mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio) VALUES\
-                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)",notass)
+                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)",nota)
                         print(f"Datos insertados correctamente \nEl folio de la nota es {mi_cursor.lastrowid}")
+                        break
             except Error as e:
                     print (e)
             except:
