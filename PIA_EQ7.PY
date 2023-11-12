@@ -60,117 +60,109 @@ def insertar_notas():
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute(("SELECT clave_cliente, cliente FROM CLIENTES ORDER BY clave_cliente"))
+                mi_cursor = conn.cursor()
+
+                mi_cursor.execute("SELECT clave_cliente, cliente FROM CLIENTES ORDER BY clave_cliente")
                 clientes = mi_cursor.fetchall()
                 if clientes:
-                    print("Listado de clientes:\n")
-                    print("Clave \t Nombre de cliente")
+                    print("\nListado de clientes:\n")
+                    table = PrettyTable()
+                    table.field_names = ["Clave", "Nombre de cliente"]
+
                     for clave, nombre in clientes:
-                        print(f"\n{clave} \t {nombre}")
-                    break
-                else: 
-                    print("No se encontraron coincidencias")
-                    break
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
-    while True:
-        try:
-            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
+                        table.add_row([clave, nombre])
+
+                    print(table)
+                else:
+                    print("No se encontraron coincidencias en CLIENTES")
+
                 mi_cursor.execute("SELECT id_servicio, nombre_servicio, costo_servicio FROM SERVICIOS ORDER BY id_servicio")
                 servicios = mi_cursor.fetchall()
-
                 if servicios:
                     print("\nListado de servicios disponibles:\n")
-                    print("Clave \t Nombre de servicio \t\t Costo")
-                    for id_servicio, nombre_servicio, costo_servicio in servicios:
-                        print(f"\n{id_servicio} \t {nombre_servicio} \t {costo_servicio}")
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
+                    table = PrettyTable()
+                    table.field_names = ["Clave", "Nombre de servicio", "Costo"]
 
-        nota={}
-        while True:
-            try:
-                fecha=datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "),"%d/%m/%Y").date()
-                if fecha<datetime.datetime.today().date():
-                    break
-                else: 
-                   print("Ingrese una fecha válida")  
-            except ValueError:
-                print("Ingrese una fecha válida")    
-        
-        while True:
-            try:
-                with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                    mi_cursor=conn.cursor()
-                    while True:
-                        cliente_clave_ingreso=int(input("Ingrese la clave del cliente: "))
+                    for id_servicio, nombre_servicio, costo_servicio in servicios:
+                        table.add_row([id_servicio, nombre_servicio, costo_servicio])
+
+                    print(table)
+                else:
+                    print("No se encontraron servicios disponibles")
+
+                nota = {}
+                while True:
+                    try:
+                        fecha = datetime.datetime.strptime(input("Ingrese la fecha dd/mm/aaaa: "), "%d/%m/%Y").date()
+                        if fecha < datetime.datetime.today().date():
+                            break
+                        else:
+                            print("Ingrese una fecha válida")
+                    except ValueError:
+                        print("Ingrese una fecha válida")
+
+                while True:
+                    try:
+                        cliente_clave_ingreso = int(input("Ingrese la clave del cliente: "))
                         if cliente_clave_ingreso:
-                            valores_clie={"clave_cliente":cliente_clave_ingreso}
-                            mi_cursor.execute("SELECT clave_cliente FROM CLIENTES WHERE clave_cliente=:clave_cliente", valores_clie)
+                            valores_clie = {"clave_cliente": cliente_clave_ingreso}
+                            mi_cursor.execute("SELECT clave_cliente FROM CLIENTES WHERE clave_cliente=:clave_cliente",
+                                              valores_clie)
                             cliente = mi_cursor.fetchone()
                             if cliente:
-                                clave_cliente=cliente_clave_ingreso
+                                clave_cliente = cliente_clave_ingreso
                                 break
                             else:
                                 print("El cliente no está registrado")
                         else:
                             print("No se puede dejar vacío")
-                    while True:
-                        servicio_clave_ingreso=int(input("Ingrese la clave del servicio realizado: "))
+                    except ValueError:
+                        print("Ingrese una clave de cliente válida")
+
+                while True:
+                    try:
+                        servicio_clave_ingreso = int(input("Ingrese la clave del servicio realizado: "))
                         if servicio_clave_ingreso:
-                            clave=(servicio_clave_ingreso,)
+                            clave = (servicio_clave_ingreso,)
                             mi_cursor.execute("SELECT costo_servicio FROM SERVICIOS WHERE id_servicio=?", clave)
                             servicios = mi_cursor.fetchone()
                             if servicios:
-                                for costo_servicio in servicios:
-                                    clave_servicio=servicio_clave_ingreso
-                                    costo_servicio_insertar=costo_servicio
-                                    break
+                                costo_servicio_insertar = servicios[0]
                                 break
                             else:
                                 print("El servicio no existe")
                         else:
-                            print("No se puede dejar vacío")  
-            except Error as e:
-                print (e)
-            except Exception:
-                print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-            finally:
-                conn.close()
+                            print("No se puede dejar vacío")
+                    except ValueError:
+                        print("Ingrese una clave de servicio válida")
 
-            nota["Fecha"] = fecha
-            nota["Estatus"] = 1
-            nota["Monto_pago"] = costo_servicio
-            nota["clave_cliente"] = clave_cliente
-            nota["id_servicio"]=clave_servicio
+                nota["Fecha"] = fecha
+                nota["Estatus"] = 1
+                nota["Monto_pago"] = costo_servicio_insertar
+                nota["clave_cliente"] = clave_cliente
+                nota["id_servicio"] = servicio_clave_ingreso
 
-            try:
-                while True:
+                try:
                     with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                         mi_cursor = conn.cursor()
-                        mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio) VALUES\
-                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)",nota)
+                        mi_cursor.execute(
+                            "INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio) VALUES\
+                            (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)", nota)
                         print(f"Datos insertados correctamente \nEl folio de la nota es {mi_cursor.lastrowid}")
                         break
-            except Error as e:
-                    print (e)
-            except:
-                    print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-            finally:
+                except Error as e:
+                    print(e)
+                except Exception as ex:
+                    print(f"Se produjo el siguiente error: {ex}")
+                finally:
                     conn.commit()
-                    conn.close()
-                    menu_notas()
-            
+
+        except Error as e:
+            print(e)
+        except Exception as ex:
+            print(f"Se produjo el siguiente error: {ex}")
+        finally:
+            conn.close()
 
 def cancelar_nota():
     while True:
@@ -288,8 +280,7 @@ def menu_consultas_notas():
             elif subopcion == "2":
                 consultar_por_folio()
             elif subopcion == "3":
-                pass
-               ## consultar_por_rfc()
+                consultar_por_rfc()
             elif subopcion=="4":
                 menu_principal()
             else:
@@ -417,6 +408,38 @@ def consultar_por_folio():
         print(f"Se produjo el siguiente error: {ex}")
     finally:
         menu_consultas_notas()
+
+def consultar_por_rfc():
+    try:
+        rfc_a_buscar = input("Ingrese el RFC del cliente para buscar notas: ")
+
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor = conn.cursor()
+            mi_cursor.execute("""
+                SELECT N.FOLIO, N.FECHA, C.cliente, C.RFC, N.monto_pago, S.nombre_servicio
+                FROM NOTAS N
+                INNER JOIN CLIENTES C ON N.clave_cliente = C.clave_cliente
+                INNER JOIN SERVICIOS S ON N.id_servicio = S.id_servicio
+                WHERE C.RFC = ?
+            """, (rfc_a_buscar,))
+
+            notas_encontradas = mi_cursor.fetchall()
+
+            if notas_encontradas:
+                print(f"Notas encontradas para el RFC {rfc_a_buscar}:\n")
+                table = PrettyTable(["Folio", "Fecha", "Cliente", "RFC", "Monto de pago", "Nombre del servicio"])
+                for folio, fecha, cliente, rfc, monto_pago, nombre_servicio in notas_encontradas:
+                    table.add_row([folio, fecha, cliente, rfc, monto_pago, nombre_servicio])
+                print(table)
+            else:
+                print(f"No se encontraron notas para el RFC {rfc_a_buscar}.")
+    except Error as e:
+        print(e)
+    except Exception as ex:
+        print(f"Se produjo el siguiente error: {ex}")
+    finally:
+        # Optionally, you can add a return to the menu or other functionality here
+        pass
 
 
 def menu_clientes():
