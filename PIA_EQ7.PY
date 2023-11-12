@@ -174,35 +174,40 @@ def insertar_notas():
 
 def cancelar_nota():
     while True:
-        try: 
+        try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago\
-                                   FROM NOTAS N INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente INNER JOIN SERVICIOS S ON \
-                                    N.id_servicio=S.id_servicio WHERE N.estatus=1")
+                mi_cursor = conn.cursor()
+                mi_cursor.execute("""
+                    SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago
+                    FROM NOTAS N
+                    INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente
+                    INNER JOIN SERVICIOS S ON N.id_servicio=S.id_servicio
+                    WHERE N.estatus=1
+                """)
                 notas = mi_cursor.fetchall()
+
                 if notas:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente \t Cliente \t RFC\
-                          \tCorreo \tid_servicio \tNombre del servicio\
-                          \tCosto del servicio \tMonto de pago total")
-                    for Folio, Fecha, Clave_c, Nombre_c, rfc, Correo, id_servicio,n_servicio ,c_servicio , monto_p in notas:
-                        print(f"\n{Folio} \t{Fecha} \t{Clave_c} \t{Nombre_c} \t{rfc} \t{Correo} \t{id_servicio} \t{n_servicio} \t{c_servicio}\t {monto_p}")
-                
+                    table = PrettyTable(["Folio", "Fecha", "Clave Cliente", "Cliente", "RFC", "Correo", "ID Servicio", "Nombre Servicio", "Costo Servicio", "Monto Pago Total"])
+                    for folio, fecha, clave_c, nombre_c, rfc, correo, id_servicio, n_servicio, c_servicio, monto_p in notas:
+                        table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, id_servicio, n_servicio, c_servicio, monto_p])
+                    print(table)
+
                     print("¿Desea cancelar una nota?")
-                    cancelar=input()
-                    if cancelar.upper=="SI":
-                        cancelar_folio=int(input("Ingrese el folio: "))
-                        values={"folio":cancelar_folio}
+                    cancelar = input().upper()
+                    if cancelar == "SI":
+                        cancelar_folio = int(input("Ingrese el folio: "))
+                        values = {"folio": cancelar_folio}
                         mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
-                    elif cancelar.upper=="NO":
-                        print("Volviendo al menu de consultas de notas")
+                        print("Nota cancelada con éxito.")
+                    elif cancelar == "NO":
+                        print("Volviendo al menú de consultas de notas")
                         menu_notas()
-                else: 
+                else:
                     print("No se encontraron coincidencias")
                     menu_notas()
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
@@ -210,50 +215,62 @@ def cancelar_nota():
 
 def recuperar_nota_cancelada():
     while True:
-        try: 
+        try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT FOLIO, FECHA, clave_cliente\
-                                   FROM NOTAS WHERE estatus=0")
+                mi_cursor = conn.cursor()
+                mi_cursor.execute("SELECT FOLIO, FECHA, clave_cliente FROM NOTAS WHERE estatus=0")
                 notas = mi_cursor.fetchall()
+                
                 if notas:
                     print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Clave del cliente")
-                    for Folio, Fecha, Clave_c, in notas:
-                        print(f"\n{Folio} \t{Fecha} \t{Clave_c}")
-                
+                    table = PrettyTable(["Folio", "Fecha", "Clave del cliente"])
+                    for folio, fecha, clave_cliente in notas:
+                        table.add_row([folio, fecha, clave_cliente])
+                    print(table)
+
                     print("¿Desea recuperar una nota?")
-                    cancelar=input()
-                    if cancelar.upper=="SI":
-                        cancelar_folio=int(input("Ingrese el folio: "))
+                    respuesta = input().upper()
+
+                    if respuesta == "SI":
+                        cancelar_folio = int(input("Ingrese el folio: "))
                         print(f"Los datos de la nota con el folio {cancelar_folio} son:")
-                        mi_cursor.execute("SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago\
-                                   FROM NOTAS N INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente INNER JOIN SERVICIOS S ON \
-                                    N.id_servicio=S.id_servicio WHERE N.estatus=1")
-                        notas = mi_cursor.fetchall()
-                        if notas:
+                        mi_cursor.execute("""
+                            SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago
+                            FROM NOTAS N
+                            INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente
+                            INNER JOIN SERVICIOS S ON N.id_servicio=S.id_servicio
+                            WHERE N.folio=? AND N.estatus=0
+                        """, (cancelar_folio,))
+                        nota = mi_cursor.fetchone()
+
+                        if nota:
                             print("NOTA:\n")
-                            print("Folio \t Fecha \t Clave del cliente \t Cliente \t RFC\
-                                \tCorreo \tid_servicio \tNombre del servicio\
-                                \tCosto del servicio \tMonto de pago total")
-                            for Folio, Fecha, Clave_c, Nombre_c, rfc, Correo, id_servicio,n_servicio ,c_servicio , monto_p in notas:
-                                print(f"\n{Folio} \t{Fecha} \t{Clave_c} \t{Nombre_c} \t{rfc} \t{Correo} \t{id_servicio} \t{n_servicio} \t{c_servicio}\t {monto_p}")
-                        res=input("¿Desea confirmar la cancelación?")
-                        if res.upper==("SI"):
-                            values={"folio":cancelar_folio}
-                            mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
-                            print("Nota recuperada exitosamente")
-                        elif cancelar.upper=="NO":
-                            print("La nota no fue recuperada \nVolviendo al menu de consultas de notas")
+                            table = PrettyTable(["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo", "ID Servicio", "Nombre del servicio", "Costo del servicio", "Monto de pago total"])
+                            table.add_row([nota[0], nota[1], nota[2], nota[3], nota[4], nota[5], nota[6], nota[7], nota[8], nota[9]])
+                            print(table)
+
+                            res = input("¿Desea confirmar la recuperación? ").upper()
+
+                            if res == "SI":
+                                values = {"folio": cancelar_folio}
+                                mi_cursor.execute("UPDATE NOTAS SET estatus=1 WHERE folio=:folio", values)
+                                print("Nota recuperada exitosamente")
+                            else:
+                                print("La nota no fue recuperada\nVolviendo al menú de consultas de notas")
+                                menu_notas()
+                        else:
+                            print("No se encontró ninguna nota con el folio ingresado.")
                             menu_notas()
-                    elif cancelar.upper=="NO":
-                        print("La nota no fue recuperada \nVolviendo al menu de consultas de notas")
+                    elif respuesta == "NO":
+                        print("La nota no fue recuperada\nVolviendo al menú de consultas de notas")
                         menu_notas()
-                else: 
+                    else:
+                        print("Opción no válida. Por favor, ingrese 'SI' o 'NO'.")
+                else:
                     print("No se encontraron coincidencias")
                     menu_notas()
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
@@ -278,98 +295,128 @@ def menu_consultas_notas():
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
 
-def consultar_por_periodo(): 
-
+def consultar_por_periodo():
     try:
         fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa (deje en blanco para usar 01/01/2000): ")
         if fecha_inicial_str.strip() == '':
-            f_i=('1/1/2000')
+            f_i = '1/1/2000'
             fecha_inicial = datetime.datetime.strptime(f_i, "%d/%m/%Y").date()
         else:
             fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
+
         fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa (deje en blanco para usar la fecha actual): ")
         if fecha_final_str.strip() == "":
             fecha_final = datetime.datetime.today().date()
         else:
             fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
+
         if fecha_final < fecha_inicial:
             print("La fecha final debe ser igual o posterior a la fecha inicial.")
-            return        
+            return
     except ValueError:
         print("Fecha ingresada inválida.")
-    fechas=(fecha_inicial,fecha_final)
-    while True:
-        try: 
-            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, CLIENTES.cliente, CLIENTES.RFC, CLIENTES.correo, \
-                                  NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio \
-                                  FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
-                                   NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.estatus=1 AND NOTAS.fecha BETWEEN ? AND ?", fechas)
-                clientes = mi_cursor.fetchall()
-                if clientes:
-                    print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha")
-                    for Folio, Fecha,Clave_c, Nombre_c, RFC, Correo, monto_p, Servicio, costo_Servicio  in clientes:
-                        print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {RFC}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
-                    break
-                else: 
-                    print("No se encontraron coincidencias")
-                    menu_reportes_servicios()
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
-        print("Desea preservar los datos en un archivo")
-        print("1. Exportar a excel")
-        print("2. Exportar a csv")
-        print("3. Regresar al menu de consltas")
-        opcion=int(input("Elija la opcion: "))
-        if opcion==1:
-            exportar_a_excel()
-        elif opcion==2:
-            exportar_a_csv()
-        elif opcion==3:
-            menu_consultas_notas()
+        return
+
+    fechas = (fecha_inicial, fecha_final)
+
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor = conn.cursor()
+            mi_cursor.execute("""
+                SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, CLIENTES.cliente, CLIENTES.RFC, CLIENTES.correo,
+                    NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio
+                FROM NOTAS
+                INNER JOIN CLIENTES ON NOTAS.clave_cliente = CLIENTES.clave_cliente
+                INNER JOIN SERVICIOS ON NOTAS.id_servicio = SERVICIOS.id_servicio
+                WHERE NOTAS.estatus = 1 AND NOTAS.fecha BETWEEN ? AND ?
+            """, fechas)
+
+            notas = mi_cursor.fetchall()
+
+            if notas:
+                print("NOTAS ENCONTRADAS:\n")
+                table = PrettyTable(["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo",
+                                     "Monto de pago", "Servicio", "Costo del servicio"])
+                for folio, fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio in notas:
+                    table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio])
+                print(table)
+
+                print("¿Desea preservar los datos en un archivo?")
+                print("1. Exportar a Excel")
+                print("2. Exportar a CSV")
+                print("3. Regresar al menú de consultas")
+                opcion = int(input("Elija la opción: "))
+
+                if opcion == 1:
+                    exportar_a_excel(notas)
+                elif opcion == 2:
+                    exportar_a_csv(notas)
+                elif opcion == 3:
+                    menu_consultas_notas()
+            else:
+                print("No se encontraron coincidencias")
+                menu_reportes_servicios()
+
+    except Error as e:
+        print(e)
+    except Exception as ex:
+        print(f"Se produjo el siguiente error: {ex}")
+    finally:
+        conn.close()
 
 def consultar_por_folio():
-    while True:
-        try: 
-            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT N.FOLIO, N.FECHA, C.cliente\
-                                   FROM NOTAS N INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente WHERE N.estatus=1")
-                notas = mi_cursor.fetchall()
-                if notas:
-                    print("NOTAS ENCONTRADAS:\n")
-                    print("Folio \t Fecha \t Cliente")
-                    for Folio, Fecha, clietnte, in notas:
-                        print(f"\n{Folio} \t{Fecha} \t{clietnte}")
-                    folio =int(input("Ingrese el folio de la nota que deasea consultar: "))
-                    if folio==Folio:
-                        valores={"folio":folio}
-                        mi_cursor.execute("SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, FROM CLIENTES.cliente, CLIENTES.RFC\
-                                        CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio\
-                                        FROM NOTAS INNER JOIN CLIENTES ON NOTAS.clave_cliente=CLIENTES.clave_cliente INNER JOIN SERVICIOS ON \
-                                            NOTAS.id_servicio=SERVICIOS.id_servicio WHERE NOTAS.folio=:folio AND NOTAS.estatus=1", valores) 
-                        nota = mi_cursor.fetchall()
-                        if nota:
-                            print("NOTAS ENCONTRADAS:\n")
-                            print("Folio \t Fecha \t Clave del cliente \t Nombre del cliente \t RFC\
-                                        \tCorreo \tMonto de pago total \t Nombre del servicio \tCosto_servicio")
-                            for Folio, Fecha,Clave_c, Nombre_c, rfc, Correo, monto_p, Servicio, costo_Servicio  in nota:
-                                print(f"\n{Folio} \t {Fecha}\t {Clave_c}\t {Nombre_c}\t {rfc}\t {Correo}\t {monto_p}\t {Servicio}\t {costo_Servicio}")
-                else: 
-                    print("\nNo se encontraron coincidencias \nVolviendo al menú de consultas")
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
-            menu_consultas_notas()   
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor = conn.cursor()
+            mi_cursor.execute("""
+                SELECT N.FOLIO, N.FECHA, C.cliente
+                FROM NOTAS N
+                INNER JOIN CLIENTES C ON N.clave_cliente = C.clave_cliente
+                WHERE N.estatus = 1
+            """)
+            notas = mi_cursor.fetchall()
+
+            if notas:
+                print("NOTAS ENCONTRADAS:\n")
+                table = PrettyTable(["Folio", "Fecha", "Cliente"])
+                for folio, fecha, cliente in notas:
+                    table.add_row([folio, fecha, cliente])
+                print(table)
+
+                folio_elegido = int(input("Ingrese el folio de la nota que desea consultar (o ingrese 0 para volver): "))
+
+                if folio_elegido != 0:
+                    valores = {"folio": folio_elegido}
+                    mi_cursor.execute("""
+                        SELECT NOTAS.FOLIO, NOTAS.FECHA, NOTAS.clave_cliente, CLIENTES.cliente, CLIENTES.RFC,
+                            CLIENTES.correo, NOTAS.monto_pago, SERVICIOS.nombre_servicio, SERVICIOS.costo_servicio
+                        FROM NOTAS
+                        INNER JOIN CLIENTES ON NOTAS.clave_cliente = CLIENTES.clave_cliente
+                        INNER JOIN SERVICIOS ON NOTAS.id_servicio = SERVICIOS.id_servicio
+                        WHERE NOTAS.folio = :folio AND NOTAS.estatus = 1
+                    """, valores)
+
+                    nota = mi_cursor.fetchall()
+
+                    if nota:
+                        print("DETALLE DE LA NOTA:\n")
+                        detalle_table = PrettyTable([
+                            "Folio", "Fecha", "Clave del cliente", "Nombre del cliente", "RFC", "Correo",
+                            "Monto de pago", "Nombre del servicio", "Costo del servicio"
+                        ])
+                        for folio, fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio in nota:
+                            detalle_table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio])
+                        print(detalle_table)
+                    else:
+                        print("No se encontró ninguna nota con el folio ingresado.")
+            else:
+                print("No se encontraron notas registradas.")
+    except Error as e:
+        print(e)
+    except Exception as ex:
+        print(f"Se produjo el siguiente error: {ex}")
+    finally:
+        menu_consultas_notas()
 
 
 def menu_clientes():
