@@ -1,11 +1,11 @@
-#import pandas as pd
+import pandas as pd
 import re
 import datetime
 import os
 import csv
 import sqlite3
 from sqlite3 import Error
-#from prettytable import PrettyTable
+from prettytable import PrettyTable
 import sys
 
 def menu_principal():
@@ -455,9 +455,12 @@ def suspende_cliente():
 
             if clientes:
                 print("CLIENTES ENCONTRADOS:\n")
-                print("Clave \t Cliente \t RFC \t Correo")
+                
+                # Crear y mostrar la tabla
+                tabla = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
                 for cliente_info in clientes:
-                    print(f"\n{cliente_info[0]} \t {cliente_info[1]}\t {cliente_info[2]}\t {cliente_info[3]}")
+                    tabla.add_row(cliente_info)
+                print(tabla)
 
                 while True:
                     clave_c = input("\nIngrese la clave del cliente que desea cancelar (0 para cancelar): ")
@@ -472,8 +475,11 @@ def suspende_cliente():
 
                             if cliente_info and len(cliente_info) == 1:
                                 print("INFORMACION DEL CLIENTE:\n")
-                                print("Clave \t Cliente \t RFC \t Correo")
-                                print(f"\n{cliente_info[0][0]} \t {cliente_info[0][1]}\t {cliente_info[0][2]}\t {cliente_info[0][3]}")
+                                
+                                # Crear y mostrar la tabla
+                                tabla_info = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
+                                tabla_info.add_row(cliente_info[0])
+                                print(tabla_info)
 
                                 res = input("¿Desea cancelar la nota? SI/NO ").upper()
                                 if res == 'SI':
@@ -489,11 +495,10 @@ def suspende_cliente():
 
             else:
                 print("\nNo se encontraron coincidencias\nVolviendo al menú de consultas")
-
     except Error as e:
         print(e)
-    except Exception as e:
-        print(f"Se produjo el siguiente error: {e}")
+    except Exception:
+        print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
 
 def recuperar_cliente():
     try:
@@ -503,9 +508,10 @@ def recuperar_cliente():
 
             if clientes:
                 print("CLIENTES ENCONTRADOS:\n")
-                print("Clave \t Cliente \t RFC \t Correo")
+                tabla = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
                 for clave, cliente, rfc, correo in clientes:
-                    print(f"\n{clave} \t {cliente}\t {rfc}\t {correo}")
+                    tabla.add_row([clave, cliente, rfc, correo])
+                print(tabla)
 
                 while True:
                     clave_c = input("\nIngrese la clave del cliente que desea recuperar (0 para cancelar): ")
@@ -520,9 +526,10 @@ def recuperar_cliente():
 
                             if cliente:
                                 print("INFORMACION DEL CLIENTE:\n")
-                                print("Cliente \t RFC \t Correo")
-                                cliente, rfc, correo = cliente[0]
-                                print(f"\n{cliente}\t {rfc}\t {correo}")
+                                tabla_info = PrettyTable(["Cliente", "RFC", "Correo"])
+                                nombre, rfc, correo = cliente[0]
+                                tabla_info.add_row([nombre, rfc, correo])
+                                print(tabla_info)
 
                                 res = input("¿Desea recuperar el cliente? SI/NO ").upper()
                                 if res == 'SI':
@@ -567,31 +574,38 @@ def ordenar_por_clave_clientes():
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute(("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY clave_cliente"))
+                mi_cursor = conn.cursor()
+                mi_cursor.execute("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY clave_cliente")
                 clientes = mi_cursor.fetchall()
+                
                 if clientes:
                     print("Listado de clientes ordenados por clave:\n")
-                    print("Clave \tCliente \t RFC \tCorreo")
-                    for clave, nombre, rfc, correo  in clientes:
-                        print(f"\n{clave} \t {nombre}\t {rfc}\t {correo}")
+                    
+                    # Crear y mostrar la tabla
+                    tabla = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
+                    for clave, nombre, rfc, correo in clientes:
+                        tabla.add_row([clave, nombre, rfc, correo])
+                    print(tabla)
+                    
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
-                    opcion=int(input("1. Exportar \n2. Volver al menú de consultas"))
-                    if opcion==1:
-                        op_Ex=(input("\n1. Exportar a execel \n2. Exportar a cvs \n"))
-                        if op_Ex==1:
-                            pass
-                        elif op_Ex==2:
-                            pass
+                    opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
+                    
+                    if opcion == 1:
+                        op_Ex = int(input("\n1. Exportar a Excel \n2. Exportar a CSV \n"))
+                        if op_Ex == 1:
+                            pass  # Agrega lógica para exportar a Excel
+                        elif op_Ex == 2:
+                            pass  # Agrega lógica para exportar a CSV
                         break
-                    elif opcion==2:
-                            menu_clientes()    
-                    break       
+                    elif opcion == 2:
+                        menu_clientes()
+                        break
                 else: 
                     print("No se encontraron coincidencias")
                     menu_clientes()
+                    break
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
@@ -604,16 +618,19 @@ def ordenar_por_nombre_clientes():
                 mi_cursor = conn.cursor()
                 mi_cursor.execute("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY cliente")
                 clientes = mi_cursor.fetchall()
-
+                
                 if clientes:
                     # Ordenar la lista por el nombre del cliente
                     clientes = sorted(clientes, key=lambda x: x[1])
-
+                    
                     print("Listado de clientes ordenados por nombre:\n")
-                    print("Nombre \tClave \t RFC \tCorreo")
+                    
+                    # Crear y mostrar la tabla
+                    tabla = PrettyTable(["Nombre", "Clave", "RFC", "Correo"])
                     for clave, cliente, rfc, correo in clientes:
-                        print(f"\n{cliente} \t {clave}\t {rfc}\t {correo}")
-
+                        tabla.add_row([cliente, clave, rfc, correo])
+                    print(tabla)
+                    
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
                     opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
 
@@ -637,7 +654,6 @@ def ordenar_por_nombre_clientes():
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-            
 
 def menu_servicios():
     while True:
