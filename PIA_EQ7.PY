@@ -138,8 +138,6 @@ def insertar_notas():
                                     clave_servicio=servicio_clave_ingreso
                                     costo_servicio_insertar=costo_servicio
                                     break
-                                print(costo_servicio)
-                                print(type(costo_servicio_insertar))
                                 break
                             else:
                                 print("El servicio no existe")
@@ -157,8 +155,7 @@ def insertar_notas():
             nota["Monto_pago"] = costo_servicio
             nota["clave_cliente"] = clave_cliente
             nota["id_servicio"]=clave_servicio
-            notass.append(nota)
-            print(notass)
+
             try:
                 while True:
                     with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
