@@ -1,8 +1,6 @@
 import pandas as pd
 import re
 import datetime
-import os
-import csv
 import sqlite3
 from sqlite3 import Error
 from prettytable import PrettyTable
@@ -269,16 +267,13 @@ def menu_consultas_notas():
             print("\n--- Submenú Consultas y Reportes ---")
             print("1. Consulta por período")
             print("2. Consulta por folio")
-            print("3. Consulta por cliente")
-            print("4. Regresa al menú principal")
+            print("3. Regresa al menú principal")
             subopcion = input("Seleccione una opción: ")
             if subopcion == "1":
                 consultar_por_periodo()
             elif subopcion == "2":
                 consultar_por_folio()
             elif subopcion == "3":
-                consultar_por_rfc()
-            elif subopcion=="4":
                 return
             else:
                 print("Opción inválida. Por favor, elija una opción válida.")
@@ -334,11 +329,18 @@ def consultar_por_periodo():
                 print("2. Exportar a CSV")
                 print("3. Regresar al menú de consultas")
                 opcion = int(input("Elija la opción: "))
-
+                datos=dict()
+                datos_grabar=(fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio)
+                datos[folio]=datos_grabar
+                columnas="Fecha", "Clave del cliente", "Cliente", "RFC", "Correo","Monto de pago", "Servicio", "Costo del servicio"
+                nombre_archivo="ReportePorPeriodo"
+                fecha1=fecha_inicial.strftime("%m-%d-%Y")
+                fecha2=fecha_final.strftime("%m-%d-%Y")                
+                fecha=f"{fecha1}_{fecha2}"
                 if opcion == 1:
-                    exportar_a_excel(notas)
+                    exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
                 elif opcion == 2:
-                    exportar_a_csv(notas)
+                    exportar_a_csv(datos, columnas,nombre_archivo, fecha)
                 elif opcion == 3:
                     return
             else:
@@ -399,37 +401,6 @@ def consultar_por_folio():
                         print("No se encontró ninguna nota con el folio ingresado.")
             else:
                 print("No se encontraron notas registradas.")
-    except Error as e:
-        print(e)
-    except Exception as ex:
-        print(f"Se produjo el siguiente error: {ex}")
-    finally:
-        return
-
-def consultar_por_rfc():
-    try:
-        rfc_a_buscar = input("Ingrese el RFC del cliente para buscar notas: ")
-
-        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-            mi_cursor = conn.cursor()
-            mi_cursor.execute("""
-                SELECT N.FOLIO, N.FECHA, C.cliente, C.RFC, N.monto_pago, S.nombre_servicio
-                FROM NOTAS N
-                INNER JOIN CLIENTES C ON N.clave_cliente = C.clave_cliente
-                INNER JOIN SERVICIOS S ON N.id_servicio = S.id_servicio
-                WHERE C.RFC = ?
-            """, (rfc_a_buscar,))
-
-            notas_encontradas = mi_cursor.fetchall()
-
-            if notas_encontradas:
-                print(f"Notas encontradas para el RFC {rfc_a_buscar}:\n")
-                table = PrettyTable(["Folio", "Fecha", "Cliente", "RFC", "Monto de pago", "Nombre del servicio"])
-                for folio, fecha, cliente, rfc, monto_pago, nombre_servicio in notas_encontradas:
-                    table.add_row([folio, fecha, cliente, rfc, monto_pago, nombre_servicio])
-                print(table)
-            else:
-                print(f"No se encontraron notas para el RFC {rfc_a_buscar}.")
     except Error as e:
         print(e)
     except Exception as ex:
@@ -541,7 +512,6 @@ def suspende_cliente():
                             if cliente_info and len(cliente_info) == 1:
                                 print("INFORMACION DEL CLIENTE:\n")
                                 
-                                # Crear y mostrar la tabla
                                 tabla_info = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
                                 tabla_info.add_row(cliente_info[0])
                                 print(tabla_info)
@@ -657,11 +627,18 @@ def ordenar_por_clave_clientes():
                     opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
                     
                     if opcion == 1:
+                        datos=dict()
+                        datos_grabar=(nombre, rfc, correo)
+                        datos[clave]=datos_grabar
+                        columnas= "Cliente", "RFC", "Correo"
+                        nombre_archivo="ReporteClinteActivoPorClave"
+                        fecha_actual=datetime.datetime.now()
+                        fecha=fecha_actual.strftime("%m-%d-%Y")
                         op_Ex = int(input("\n1. Exportar a Excel \n2. Exportar a CSV \n"))
                         if op_Ex == 1:
-                            pass  # Agrega lógica para exportar a Excel
+                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
                         elif op_Ex == 2:
-                            pass  # Agrega lógica para exportar a CSV
+                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
                         break
                     elif opcion == 2:
                         return
@@ -686,12 +663,10 @@ def ordenar_por_nombre_clientes():
                 clientes = mi_cursor.fetchall()
                 
                 if clientes:
-                    # Ordenar la lista por el nombre del cliente
                     clientes = sorted(clientes, key=lambda x: x[1])
                     
                     print("Listado de clientes ordenados por nombre:\n")
                     
-                    # Crear y mostrar la tabla
                     tabla = PrettyTable(["Nombre", "Clave", "RFC", "Correo"])
                     for clave, cliente, rfc, correo in clientes:
                         tabla.add_row([cliente, clave, rfc, correo])
@@ -701,11 +676,18 @@ def ordenar_por_nombre_clientes():
                     opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
 
                     if opcion == 1:
+                        datos=dict()
+                        datos_grabar=(cliente, rfc, correo)
+                        datos[clave]=datos_grabar
+                        columnas= "Cliente", "RFC", "Correo"
+                        nombre_archivo="ReporteClientesActivosPorNombre"
+                        fecha_actual=datetime.datetime.now()
+                        fecha=fecha_actual.strftime("%m-%d-%Y")
                         op_Ex = int(input("\n1. Exportar a Excel \n2. Exportar a CSV \n"))
                         if op_Ex == 1:
-                            exportar_a_excel(clientes)
+                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
                         elif op_Ex == 2:
-                            exportar_a_csv(clientes)
+                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
                         break
                     elif opcion == 2:
                         return
@@ -763,7 +745,7 @@ def buscar_por_clave_servicio():
                     for id_servicio, nombre_servicio, costo_servicio in registro:
                         print(f"\n Clave del servicio: {id_servicio}")
                         print(f"\n Nombre del servicio: {nombre_servicio}")
-                        print(f"\n COsto del servicio: {costo_servicio}")
+                        print(f"\n Costo del servicio: {costo_servicio}")
                 else:
                     print("No se encontró ningún servicio con la clave ingresada.")
         except Error as e:
@@ -882,15 +864,23 @@ def servicio_mas_prestado():
                     print(f"Listado los {cant_Servicios} más prestados entre las fechas:\n")
                     print("Nombre \tCantidad")
                     for nombre, cantidad in registros:
-                        print(f"\n{nombre} \t {cantidad}")
-                    print("\n¿Desea exportar el resultado o desea volver al menú?")
-                    opcion=int(input("1. Exportar \n2. Volver al menú de consultas"))
+                        print(f"\n{nombre} \t\t {cantidad}")
+                    print("\n¿Desea exportar el resultado o desea volver al menú? ")
+                    opcion=int(input("\n1. Exportar \n2. Volver al menú de consultas \n"))
                     if opcion==1:
-                        op_Ex=(input("\n1. Exportar a excel \2. Exportar a cvs \n"))
+                        datos=dict()
+                        datos_grabar=(nombre, cantidad)
+                        datos_grabar
+                        columnas= "Nombre", "Cantidad"
+                        nombre_archivo="ReporteServiciosMasPrestados"
+                        fecha1=fecha_inicial.strftime("%m-%d-%Y")
+                        fecha2=fecha_final.strftime("%m-%d-%Y")                
+                        fecha=f"{fecha1}_{fecha2}"
+                        op_Ex=int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
                         if op_Ex==1:
-                            pass
+                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
                         elif op_Ex==2:
-                            pass
+                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
                         break
                     elif opcion==2:
                             menu_estadisticas()    
@@ -941,14 +931,21 @@ def clientes_mas_notas():
                     for nombre, cantidad in registros:
                         print(f"\n{nombre} \t {cantidad}")
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
-                    opcion=int(input("1. Exportar \n2. Volver al menú de consultas"))
+                    opcion=int(input("1. Exportar \n2. Volver al menú de consultas \n"))
                     if opcion==1:
-                        op_Ex=(input("\n1. Exportar a execel \2. Exportar a cvs \n"))
+                        datos=dict()
+                        datos_grabar=(nombre, cantidad)
+                        datos_grabar
+                        columnas= "Nombre", "Cantidad"
+                        nombre_archivo="ReporteClientesConMasNotas"
+                        fecha1=fecha_inicial.strftime("%m-%d-%Y")
+                        fecha2=fecha_final.strftime("%m-%d-%Y")                
+                        fecha=f"{fecha1}_{fecha2}"
+                        op_Ex=int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
                         if op_Ex==1:
-                            pass
+                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
                         elif op_Ex==2:
-                            pass
-                        break
+                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
                     elif opcion==2:
                             menu_estadisticas()    
                     break       
@@ -1020,29 +1017,25 @@ def validar_correo(correoelectronico):
         print("ERROR. El dato ingresado no es valido. Vuelva a intentarlo")
         return False
 
-def exportar_a_csv(datos, nombre_archivo):
+def exportar_a_csv(datos, columnas,nombre_archi, fechas):
     try:
-        df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo', 'Estatus'])
-        timestamp = datetime.now().strftime("%m_%d_%Y")
-        nombre_archivo += f"_{timestamp}.csv"
+        df = pd.DataFrame.from_dict(datos, orient='index', columns=columnas)
+        nombre_archivo=f"{nombre_archi}_{fechas}.csv"
         df.to_csv(nombre_archivo, index=False)
         print(f"Datos exportados a {nombre_archivo}")
     except Exception as e:
         print(f"Error al exportar a CSV: {e}")
 
-def exportar_a_excel(datos, nombre_archivo):
+def exportar_a_excel_df(datos,columnas, nombre_archivo, fechas):
     try:
-        df = pd.DataFrame(datos, columns=['Clave', 'Nombre de servicio', 'Costo', 'Estatus'])
-        timestamp = datetime.now().strftime("%m_%d_%Y")
-        nombre_archivo += f"_{timestamp}.xlsx"
-
-        with pd.ExcelWriter(nombre_archivo, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False)
-
+        df = pd.DataFrame(datos, columns=columnas) 
+        nombre_archivo+=f"_{fechas}.xlsx"     
+        df.to_excel(nombre_archivo, index=False)
         print(f"Datos exportados a {nombre_archivo}")
         return True
     except Exception as e:
-        print(f"Error al exportar a Excel: {e}")
+        print(f"Error al exportar a Excel: {e}")       
+
 
 def listado_servicios():
     while True:
@@ -1146,7 +1139,7 @@ def buscar_por_clave_servicio(activos=True):
                         clave_elegida = int(input("\nElija una clave de servicio (o ingrese 0 para volver): "))
 
                         if clave_elegida == 0:
-                            return None  # Usuario eligió volver al menú anterior
+                            return None  
 
                         mi_cursor.execute("SELECT * FROM SERVICIOS WHERE ID_SERVICIO = ?", (clave_elegida,))
                         servicio_elegido = mi_cursor.fetchone()
