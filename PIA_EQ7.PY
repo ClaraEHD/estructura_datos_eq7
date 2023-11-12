@@ -601,35 +601,43 @@ def ordenar_por_nombre_clientes():
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute(("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY cliente"))
+                mi_cursor = conn.cursor()
+                mi_cursor.execute("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES ORDER BY cliente")
                 clientes = mi_cursor.fetchall()
+
                 if clientes:
+                    # Ordenar la lista por el nombre del cliente
+                    clientes = sorted(clientes, key=lambda x: x[1])
+
                     print("Listado de clientes ordenados por nombre:\n")
-                    print("Clave \tCliente \t RFC \tCorreo")
-                    for clave, cliente, rfc, correo  in clientes:
-                        print(f"\n{clave} \t {cliente}\t {rfc}\t {correo}")
+                    print("Nombre \tClave \t RFC \tCorreo")
+                    for clave, cliente, rfc, correo in clientes:
+                        print(f"\n{cliente} \t {clave}\t {rfc}\t {correo}")
+
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
-                    opcion=int(input("1. Exportar \n2. Volver al menú de consultas"))
-                    if opcion==1:
-                        op_Ex=(input("\n1. Exportar a execel \2. Exportar a cvs \n"))
-                        if op_Ex==1:
-                            pass
-                        elif op_Ex==2:
-                            pass
+                    opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
+
+                    if opcion == 1:
+                        op_Ex = int(input("\n1. Exportar a Excel \n2. Exportar a CSV \n"))
+                        if op_Ex == 1:
+                            exportar_a_excel(clientes)
+                        elif op_Ex == 2:
+                            exportar_a_csv(clientes)
                         break
-                    elif opcion==2:
-                            menu_clientes()    
-                    break       
+                    elif opcion == 2:
+                        menu_clientes()
+                        break
                 else: 
                     print("No se encontraron coincidencias")
                     menu_clientes()
+                    break
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
+            
 
 def menu_servicios():
     while True:
