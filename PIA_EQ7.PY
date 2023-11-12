@@ -98,7 +98,7 @@ def insertar_notas():
             conn.close()
 
 
-        notas=list()
+        notass=list()
         nota={}
         while True:
             try:
@@ -153,14 +153,14 @@ def insertar_notas():
             nota["Monto_pago"] = costo_servicio_insertar
             nota["clave_cliente"] = clave_cliente
             nota["id_servicio"]=clave_servicio
-            notas.append(nota)
-
+            notass.append(nota)
+            print(notass)
             try:
                 while True:
-                    with sqlite3.connect("BDTALLER_MECANICO.db") as conn:
+                    with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                         mi_cursor = conn.cursor()
-                        mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio)\
-                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)",notas)
+                        mi_cursor.execute("INSERT INTO NOTAS (fecha, estatus, monto_pago, clave_cliente, id_servicio) VALUES\
+                                        (:Fecha,:Estatus,:Monto_pago,:clave_cliente,:id_servicio)",notass)
                         print(f"Datos insertados correctamente \nEl folio de la nota es {mi_cursor.lastrowid}")
             except Error as e:
                     print (e)
