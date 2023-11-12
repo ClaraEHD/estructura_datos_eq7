@@ -1061,16 +1061,16 @@ def buscar_por_clave_servicio(activos=True):
             mi_cursor = conn.cursor()
 
             if activos:
-                mi_cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS WHERE estatus = 1")
+                mi_cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO, COSTO_SERVICIO FROM SERVICIOS WHERE estatus = 1")
             else:
-                mi_cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO FROM SERVICIOS WHERE estatus = 0")
+                mi_cursor.execute("SELECT ID_SERVICIO, NOMBRE_SERVICIO, COSTO_SERVICIO FROM SERVICIOS WHERE estatus = 0")
             servicios = mi_cursor.fetchall()
 
             if servicios:
-                print("\nListado de servicios:\n")
-                print("Clave \t Nombre de servicio")
+                tabla_servicios = PrettyTable(["Clave", "Nombre de Servicio", "Costo"])
                 for servicio in servicios:
-                    print(f"{servicio[0]} \t {servicio[1]}")
+                    tabla_servicios.add_row([servicio[0], servicio[1], servicio[2]])
+                print(tabla_servicios)
 
                 if not activos:
                     print("\n(Servicios suspendidos)")
@@ -1098,10 +1098,11 @@ def buscar_por_clave_servicio(activos=True):
                         print("Error: Ingrese un valor numérico válido para la clave.")
             else:
                 print("No hay servicios registrados.")
+
     except Error as e:
-        print(e)
-    except Exception:
-        print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        print(f"Error al conectarse a la base de datos: {e}")
+    except Exception as ex:
+        print(f"Se produjo el siguiente error: {ex}")
 
 def buscar_por_nombre_servicio(activos=True):
     nombre_servicio_buscar = input("Ingrese el nombre del servicio a buscar: ")
@@ -1117,19 +1118,17 @@ def buscar_por_nombre_servicio(activos=True):
 
             servicios_encontrados = mi_cursor.fetchall()
             if servicios_encontrados:
-                print("Listado de servicios:\n")
-                table = PrettyTable(["Nombre de servicio", "Clave"])
+                print("Listado de servicios encontrados:\n")
+                table = PrettyTable(["Nombre de Servicio", "Clave"])
                 for servicio in servicios_encontrados:
                     table.add_row([servicio[1], servicio[0]])
                 print(table)
             else:
                 print(f"No se encontró ningún servicio con el nombre '{nombre_servicio_buscar}'.")
     except Error as e:
-        print(e)
-    except Exception:
-        print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-    finally:
-        conn.close()
+        print(f"Error al conectarse a la base de datos: {e}")
+    except Exception as ex:
+        print(f"Se produjo el siguiente error: {ex}")
 
 def generar_reporte_servicios_por_clave():
     while True:
