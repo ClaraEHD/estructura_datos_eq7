@@ -1,11 +1,11 @@
-import pandas as pd
+#import pandas as pd
 import re
 import datetime
 import os
 import csv
 import sqlite3
 from sqlite3 import Error
-from prettytable import PrettyTable
+#from prettytable import PrettyTable
 import sys
 
 def menu_principal():
@@ -434,105 +434,116 @@ def agregar_cliente():
         finally:
             conn.close()
 
+def ejecutar_query(conn, query, valores=None):
+    try:
+        with conn:
+            cursor = conn.cursor()
+            if valores:
+                cursor.execute(query, valores)
+            else:
+                cursor.execute(query)
+            return cursor.fetchall()
+    except Error as e:
+        print(e)
+        return None
+
 def suspende_cliente():
-      while True:
-        try: 
-            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT clave_cliente, cliente\
-                                   FROM CLIENTES WHERE estatus=1")
-                notas = mi_cursor.fetchall()
-                if notas:
-                    print("CLIENTES ENCONTRADOS:\n")
-                    print("Clave \t Cliente ")
-                    for clave, cliente, in notas:
-                        print(f"\n{clave} \t{cliente}")
-                    while True:
-                        clave_c =int(input("\nIngrese la clave del cliente que deasea cancelar (0 para cancelar): "))
-                        if clave_c==clave_c:
-                            valores={"clave_cliente":clave_c}
-                            mi_cursor.execute("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES WHERE clave_cliente=:clave_cliente AND estatus=1", valores) 
-                            nota = mi_cursor.fetchall()
-                            if nota:
+    try: 
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            cursor = conn.cursor()
+            clientes = ejecutar_query(conn, "SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES WHERE estatus=1")
+
+            if clientes:
+                print("CLIENTES ENCONTRADOS:\n")
+                print("Clave \t Cliente \t RFC \t Correo")
+                for cliente_info in clientes:
+                    print(f"\n{cliente_info[0]} \t {cliente_info[1]}\t {cliente_info[2]}\t {cliente_info[3]}")
+
+                while True:
+                    clave_c = input("\nIngrese la clave del cliente que desea cancelar (0 para cancelar): ")
+                    if clave_c.isdigit():
+                        clave_c = int(clave_c)
+                        if clave_c == 0:
+                            print("Volviendo al menú de consultas")
+                            break
+                        else:
+                            valores = {"clave_cliente": clave_c}
+                            cliente_info = ejecutar_query(conn, "SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES WHERE clave_cliente=:clave_cliente AND estatus=1", valores)
+
+                            if cliente_info and len(cliente_info) == 1:
                                 print("INFORMACION DEL CLIENTE:\n")
                                 print("Clave \t Cliente \t RFC \t Correo")
-                                for Clave, Cliente,rfc,correo in nota:
-                                    print(f"\n{Clave} \t {Cliente}\t {rfc}\t {correo}")
-                                res=input("¿Desea cancelar la nota? SI/NO ")
-                                if res.upper()=="SI":
-                                    mi_cursor.execute("UPDATE CLIENTES SET estatus=0 WHERE clave_cliente=:clave_cliente", valores) 
+                                print(f"\n{cliente_info[0][0]} \t {cliente_info[0][1]}\t {cliente_info[0][2]}\t {cliente_info[0][3]}")
+
+                                res = input("¿Desea cancelar la nota? SI/NO ").upper()
+                                if res == 'SI':
+                                    ejecutar_query(conn, "UPDATE CLIENTES SET estatus=0 WHERE clave_cliente=:clave_cliente", valores)
                                     print("Cliente suspendido con éxito")
                                 else:
                                     print("Regresando al menú")
-                                    menu_clientes()                               
-                            break
-                        elif clave_c==0:
-                            print("Volviendo al menú de consultas")
-                            menu_clientes()    
-                        else:
-                            print("Ingrese una clave válida")
-                else: 
-                    print("\nNo se encontraron coincidencias \nVolviendo al menú de consultas")
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
-            menu_clientes()   
+                                    break
+                            else:
+                                print("Ingrese una clave válida")
+                    else:
+                        print("Ingrese una clave válida")
 
-  
+            else:
+                print("\nNo se encontraron coincidencias\nVolviendo al menú de consultas")
+
+    except Error as e:
+        print(e)
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
 
 def recuperar_cliente():
-      while True:
-        try: 
-            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                mi_cursor.execute("SELECT clave_cliente, cliente\
-                                   FROM CLIENTES WHERE estatus=0")
-                notas = mi_cursor.fetchall()
-                if notas:
-                    print("CLIENTES ENCONTRADAS:\n")
-                    print("Clave \t Cliente ")
-                    for clave, cliente, in notas:
-                        print(f"\n{clave} \t{cliente}")
-                    while True:
-                        clave_c =int(input("\nIngrese la clave del cliente que deasea cancelar (0 para cancelar): "))
-                        if clave_c==clave_c:
-                            valores={"clave_cliente":clave_c}
-                            mi_cursor.execute("SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES WHERE clave_cliente=:clave_cliente AND estatus=0", valores) 
-                            nota = mi_cursor.fetchall()
-                            if nota:
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            cursor = conn.cursor()
+            clientes = ejecutar_query(conn, "SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES WHERE estatus=0")
+
+            if clientes:
+                print("CLIENTES ENCONTRADOS:\n")
+                print("Clave \t Cliente \t RFC \t Correo")
+                for clave, cliente, rfc, correo in clientes:
+                    print(f"\n{clave} \t {cliente}\t {rfc}\t {correo}")
+
+                while True:
+                    clave_c = input("\nIngrese la clave del cliente que desea recuperar (0 para cancelar): ")
+                    if clave_c.isdigit():
+                        clave_c = int(clave_c)
+                        if clave_c == 0:
+                            print("Volviendo al menú de consultas")
+                            break
+                        else:
+                            valores = {"clave_cliente": clave_c}
+                            cliente = ejecutar_query(conn, "SELECT cliente, RFC, correo FROM CLIENTES WHERE clave_cliente=:clave_cliente AND estatus=0", valores)
+
+                            if cliente:
                                 print("INFORMACION DEL CLIENTE:\n")
-                                print("Clave \t Cliente \t RFC \t Correo")
-                                for Clave, Cliente,rfc,correo in nota:
-                                    print(f"\n{Clave} \t {Cliente}\t {rfc}\t {correo}")
-                                res=input("¿Desea cancelar la nota? SI/NO ")
-                                if res.upper()=='SI':
-                                    mi_cursor.execute("UPDATE CLIENTES SET estatus=1 WHERE clave_cliente=:clave_cliente", valores) 
+                                print("Cliente \t RFC \t Correo")
+                                cliente, rfc, correo = cliente[0]
+                                print(f"\n{cliente}\t {rfc}\t {correo}")
+
+                                res = input("¿Desea recuperar el cliente? SI/NO ").upper()
+                                if res == 'SI':
+                                    ejecutar_query(conn, "UPDATE CLIENTES SET estatus=1 WHERE clave_cliente=:clave_cliente", valores)
                                     print("Cliente recuperado con éxito")
                                 else:
                                     print("Regresando al menú")
-                                    menu_clientes()                               
-                            break
-                        elif clave_c==0:
-                            print("Volviendo al menú de consultas")
-                            menu_clientes()    
-                        else:
-                            print("Ingrese una clave válida")
-                else: 
-                    print("\nNo se encontraron coincidencias \nVolviendo al menú de consultas")
-        except Error as e:
-            print (e)
-        except Exception:
-            print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
-        finally:
-            conn.close()
-            menu_clientes()   
+                                    break
+                            else:
+                                print("Ingrese una clave válida")
+                    else:
+                        print("Ingrese una clave válida")
 
+            else:
+                print("\nNo se encontraron coincidencias\nVolviendo al menú de consultas")
 
-
-
+    except Error as e:
+        print(e)
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+            
 def menu_consultas_clientes():
     while True:
         print("\n\t--- Menú Consultas y Reportes ---")
