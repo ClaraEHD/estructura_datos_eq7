@@ -327,27 +327,26 @@ def consultar_por_periodo():
                 print("NOTAS ENCONTRADAS:\n")
                 table = PrettyTable(["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo",
                                      "Monto de pago", "Servicio", "Costo del servicio"])
-                for folio, fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio in notas:
-                    table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio])
+                for nota in notas:
+                    table.add_row([nota[0], nota[1], nota[2], nota[3], nota[4], nota[5], nota[6], nota[7], nota[8]])
                 print(table)
 
                 print("¿Desea preservar los datos en un archivo?")
-                print("1. Exportar a Excel")
-                print("2. Exportar a CSV")
+                print("1. Exportar a CSV")
+                print("2. Exportar a Excel")
                 print("3. Regresar al menú de notas")
                 opcion = int(input("Elija la opción: "))
-                datos=dict()
-                datos_grabar=(fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio)
-                datos[folio]=datos_grabar
-                columnas="Fecha", "Clave del cliente", "Cliente", "RFC", "Correo","Monto de pago", "Servicio", "Costo del servicio"
-                nombre_archivo="ReportePorPeriodo"
                 fecha1=fecha_inicial.strftime("%m-%d-%Y")
                 fecha2=fecha_final.strftime("%m-%d-%Y")                
                 fecha=f"{fecha1}_{fecha2}"
                 if opcion == 1:
-                    exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
+                    df = pd.DataFrame(notas, columns=["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo",
+                                     "Monto de pago", "Servicio", "Costo del servicio"])
+                    exportar_a_excel(df, "ReportePorPeriodo", "nombre_archivo.xlsx", fecha)
                 elif opcion == 2:
-                    exportar_a_csv(datos, columnas,nombre_archivo, fecha)
+                    df = pd.DataFrame(notas, columns=["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo",
+                                     "Monto de pago", "Servicio", "Costo del servicio"])
+                    exportar_a_excel(df, "ReportePorPeriodo", "nombre_archivo.xlsx", fecha)
                 elif opcion == 3:
                     return
             else:
@@ -625,26 +624,22 @@ def ordenar_por_clave_clientes():
                     print("Listado de clientes ordenados por clave:\n")
                     
                     tabla = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
-                    for clave, nombre, rfc, correo in clientes:
-                        tabla.add_row([clave, nombre, rfc, correo])
+                    for cliente in clientes:
+                        tabla.add_row([cliente[0], cliente[1], cliente[2], cliente[3]])
                     print(tabla)
                     
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
                     opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
                     
                     if opcion == 1:
-                        datos=dict()
-                        datos_grabar=(nombre, rfc, correo)
-                        datos[clave]=datos_grabar
-                        columnas= "Cliente", "RFC", "Correo"
-                        nombre_archivo="ReporteClinteActivoPorClave"
+                        df = pd.DataFrame(clientes, columns=["Clave", "Cliente", "RFC", "Correo"])
                         fecha_actual=datetime.datetime.now()
                         fecha=fecha_actual.strftime("%m-%d-%Y")
                         op_Ex = int(input("\n1. Exportar a Excel \n2. Exportar a CSV \n"))
                         if op_Ex == 1:
-                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
+                            exportar_a_excel(df, "ReporteClientesActivosPorClave", "nombre_archivo.xlsx",fecha)
                         elif op_Ex == 2:
-                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
+                            exportar_a_csv_df(df, "ReporteClientesActivosPorClave", "nombre_archivo.csv", fecha)
                         break
                     elif opcion == 2:
                         return
@@ -674,26 +669,22 @@ def ordenar_por_nombre_clientes():
                     print("Listado de clientes ordenados por nombre:\n")
                     
                     tabla = PrettyTable(["Nombre", "Clave", "RFC", "Correo"])
-                    for clave, cliente, rfc, correo in clientes:
-                        tabla.add_row([cliente, clave, rfc, correo])
+                    for cliente in clientes:
+                        tabla.add_row([cliente[0], cliente[1], cliente[2], cliente[3]])
                     print(tabla)
                     
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
                     opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
 
                     if opcion == 1:
-                        datos=dict()
-                        datos_grabar=(cliente, rfc, correo)
-                        datos[clave]=datos_grabar
-                        columnas= "Cliente", "RFC", "Correo"
-                        nombre_archivo="ReporteClientesActivosPorNombre"
+                        df = pd.DataFrame(clientes, columns=["Nombre", "Clave", "RFC", "Correo"])
                         fecha_actual=datetime.datetime.now()
                         fecha=fecha_actual.strftime("%m-%d-%Y")
                         op_Ex = int(input("\n1. Exportar a Excel \n2. Exportar a CSV \n"))
                         if op_Ex == 1:
-                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
+                            exportar_a_excel(df, "ReporteClientesActivosPorNombre", "nombre_archivo.xlsx",fecha)
                         elif op_Ex == 2:
-                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
+                            exportar_a_csv_df(df, "ReporteClientesActivosPorNombre", "nombre_archivo.csv", fecha)
                     elif opcion == 2:
                         return
                 else: 
@@ -758,26 +749,24 @@ def servicio_mas_prestado():
                 if registros:
                     print(f"Listado los {cant_Servicios} más prestados entre las fechas:\n")
                     table = PrettyTable(["Nombre", "Cantidad"])
-                    for nombre, cantidad in registros:
-                        table.add_row([nombre, cantidad])
+                    for servicio in registros:
+                        table.add_row([servicio[0],servicio[1]])
                     print(table)
                     print("\n¿Desea exportar el resultado o desea volver al menú? ")
                     opcion = int(input("\n1. Exportar \n2. Volver al menú de consultas \n"))
                     if opcion == 1:
-                        datos = []
-                        for nombre, cantidad in registros:
-                            datos.append([nombre, cantidad])
-                        columnas = ["Nombre", "Cantidad"]
-                        nombre_archivo = "ReporteServiciosMasPrestados"
+                        df = pd.DataFrame(registros, columns=["Nombre", "Cantidad"])
                         fecha1 = fecha_inicial.strftime("%m-%d-%Y")
                         fecha2 = fecha_final.strftime("%m-%d-%Y")
                         fecha = f"{fecha1}_{fecha2}"
                         op_Ex = int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
                         if op_Ex == 1:
-                            exportar_a_excel_df(datos, columnas, nombre_archivo, fecha)
+                            exportar_a_excel(df, "ReporteServiciosPorClave", "nombre_archivo.xlsx", fecha)
+                            break
                         elif op_Ex == 2:
-                            exportar_a_csv(datos, columnas, nombre_archivo, fecha)
-                        break
+                            df = pd.DataFrame(registros, columns=["Clave", "Nombre", "Cantidad"])
+                            exportar_a_csv_df(df, "ReporteServiciosMasPrestados", "nombre_archivo.csv", fecha)
+                            break
                     elif opcion == 2:
                         break
                 else:
@@ -826,25 +815,21 @@ def clientes_mas_notas():
                 if registros:
                     print(f"Listado los {cant_clientes} clientes con más notas entre las fechas:\n")
                     table = PrettyTable(["Nombre", "Cantidad"])
-                    for nombre, cantidad in registros:
-                        table.add_row([nombre, cantidad])
+                    for registro in registros:
+                        table.add_row([registro[0], registro[0]])
                     print(table)
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
                     opcion = int(input("1. Exportar \n2. Volver al menú de consultas \n"))
                     if opcion == 1:
-                        datos = []
-                        for nombre, cantidad in registros:
-                            datos.append([nombre, cantidad])
-                        columnas = ["Nombre", "Cantidad"]
-                        nombre_archivo = "ReporteClientesConMasNotas"
+                        df=pd.DataFrame(registros, columns=["Nombre", "Cantidad"])
                         fecha1 = fecha_inicial.strftime("%m-%d-%Y")
                         fecha2 = fecha_final.strftime("%m-%d-%Y")
                         fecha = f"{fecha1}_{fecha2}"
                         op_Ex = int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
                         if op_Ex == 1:
-                            exportar_a_excel_df(datos, columnas, nombre_archivo, fecha)
+                            exportar_a_excel(df, "ReporteServiciosPorNombre", "nombre_archivo.xlsx", fecha)
                         elif op_Ex == 2:
-                            exportar_a_csv(datos, columnas, nombre_archivo, fecha)
+                            exportar_a_csv_df(df, "ReporteServiciosPorNombre", "nombre_archivo.csv", fecha)
                     elif opcion == 2:
                         break
                 else:
@@ -897,10 +882,6 @@ def promedio_montos_notas():
             conn.close()
 
 
-def exportar_a_excel(datos, nombre_archivo):
-    df = pd.DataFrame(datos)
-    df.to_excel(nombre_archivo, index=False)
-
 def validar_rfc(rfc):
     patron = r'^[A-Z&Ñ]{3,4}\d{6}[A-V1-9][0-9A-Z]([0-9A])?$'
     return bool(re.fullmatch(patron, rfc))
@@ -915,24 +896,6 @@ def validar_correo(correoelectronico):
         print("ERROR. El dato ingresado no es valido. Vuelva a intentarlo")
         return False
 
-def exportar_a_csv(datos, columnas,nombre_archi, fechas):
-    try:
-        df = pd.DataFrame.from_dict(datos, orient='index', columns=columnas)
-        nombre_archivo=f"{nombre_archi}_{fechas}.csv"
-        df.to_csv(nombre_archivo, index=False)
-        print(f"Datos exportados a {nombre_archivo}")
-    except Exception as e:
-        print(f"Error al exportar a CSV: {e}")
-
-def exportar_a_excel_df(datos,columnas, nombre_archivo, fechas):
-    try:
-        df = pd.DataFrame(datos, columns=columnas) 
-        nombre_archivo+=f"_{fechas}.xlsx"     
-        df.to_excel(nombre_archivo, index=False)
-        print(f"Datos exportados a {nombre_archivo}")
-        return True
-    except Exception as e:
-        print(f"Error al exportar a Excel: {e}")       
 
 
 def listado_servicios():
@@ -1087,18 +1050,16 @@ def buscar_por_nombre_servicio(activos=True):
     except Exception as ex:
         print(f"Se produjo el siguiente error: {ex}")
 
-def exportar_a_csv(data, prefijo_archivo, nombre_archivo):
-    fecha_actual = datetime.datetime.today().strftime('%m_%d_%Y')
-    nombre_archivo = f"{prefijo_archivo}_{fecha_actual}.csv"
+def exportar_a_csv_df(data, prefijo_archivo, nombre_archivo,fecha):
+    nombre_archivo = f"{prefijo_archivo}_{fecha}.csv"
     with open(nombre_archivo, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(data.columns)
         writer.writerows(data.values)
     print(f"Reporte exportado como {nombre_archivo}")
 
-def exportar_a_excel(data, prefijo_archivo, nombre_archivo):
-    fecha_actual = datetime.datetime.today().strftime('%m_%d_%Y')
-    nombre_archivo = f"{prefijo_archivo}_{fecha_actual}.xlsx"
+def exportar_a_excel(data, prefijo_archivo, nombre_archivo, fecha):
+    nombre_archivo = f"{prefijo_archivo}_{fecha}.xlsx"
     data.to_excel(nombre_archivo, index=False)
     print(f"Reporte exportado como {nombre_archivo}")
 
@@ -1121,7 +1082,7 @@ def generar_reporte_servicios_por_clave():
                     opcion = input("\nElija una opción: ")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Clave", "Nombre de servicio", "Costo", "Estatus"])
-                        exportar_a_csv(df, "ReporteServiciosPorClave", "nombre_archivo.csv")
+                        exportar_a_csv_df(df, "ReporteServiciosPorClave", "nombre_archivo.csv")
                         break
                     elif opcion == '2':
                         df = pd.DataFrame(servicios, columns=["Clave", "Nombre de servicio", "Costo", "Estatus"])
@@ -1158,7 +1119,7 @@ def generar_reporte_servicios_por_nombre():
                     opcion = input("\nElija una opción: ")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Nombre de servicio", "Clave", "Costo", "Estatus"])
-                        exportar_a_csv(df, "ReporteServiciosPorNombre", "nombre_archivo.csv")
+                        exportar_a_csv_df(df, "ReporteServiciosPorNombre", "nombre_archivo.csv")
                         break
                     elif opcion == '2':
                         df = pd.DataFrame(servicios, columns=["Nombre de servicio", "Clave", "Costo", "Estatus"])
