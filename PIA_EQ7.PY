@@ -1123,11 +1123,11 @@ def generar_reporte_servicios_por_nombre():
                     fecha = fecha_actual.strftime("%m/%d/%Y")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Nombre de servicio", "Clave", "Costo", "Estatus"])
-                        exportar_a_csv_df(df, "ReporteServiciosPorNombre", "nombre_archivo.csv")
+                        exportar_a_csv_df(df, "ReporteServiciosPorNombre", "nombre_archivo.csv", fecha)
                         break
                     elif opcion == '2':
                         df = pd.DataFrame(servicios, columns=["Nombre de servicio", "Clave", "Costo", "Estatus"])
-                        exportar_a_excel(df, "ReporteServiciosPorNombre", "nombre_archivo.xlsx")
+                        exportar_a_excel(df, "ReporteServiciosPorNombre", "nombre_archivo.xlsx", fecha)
                         break
                     elif opcion == '3':
                         return
