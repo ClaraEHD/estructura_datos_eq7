@@ -164,15 +164,17 @@ def cancelar_nota():
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
                 mi_cursor = conn.cursor()
+                print("Ingrese el folio de nota que desea cancelar: ")
+                folio=int(input())
+                values = {"folio":folio}
                 mi_cursor.execute("""
                     SELECT N.FOLIO, N.FECHA, N.clave_cliente, C.cliente, C.RFC, C.correo, N.id_servicio, S.nombre_servicio, S.costo_servicio, N.monto_pago
                     FROM NOTAS N
                     INNER JOIN CLIENTES C ON N.clave_cliente=C.clave_cliente
                     INNER JOIN SERVICIOS S ON N.id_servicio=S.id_servicio
-                    WHERE N.estatus=1
-                """)
+                    WHERE N.estatus=1 AND N.FOLIO=:folio
+                """, values)
                 notas = mi_cursor.fetchall()
-
                 if notas:
                     print("NOTAS ENCONTRADAS:\n")
                     table = PrettyTable(["Folio", "Fecha", "Clave Cliente", "Cliente", "RFC", "Correo", "ID Servicio", "Nombre Servicio", "Costo Servicio", "Monto Pago Total"])
@@ -180,16 +182,15 @@ def cancelar_nota():
                         table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, id_servicio, n_servicio, c_servicio, monto_p])
                     print(table)
 
-                    print("¿Desea cancelar una nota?")
+                    print("¿Desea confirmar la cancelación de la nota?")
                     cancelar = input().upper()
                     if cancelar == "SI":
-                        cancelar_folio = int(input("Ingrese el folio: "))
-                        values = {"folio": cancelar_folio}
-                        mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE folio=:folio", values)
+                        mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE FOLIO=:folio", values)
                         print("Nota cancelada con éxito.")
+                        menu_notas()
                     elif cancelar == "NO":
-                        print("Volviendo al menú de consultas de notas")
-                        return
+                        print("Volviendo al menú de notas")
+                        menu_notas()
                 else:
                     print("No se encontraron coincidencias")
                     menu_notas()
@@ -327,7 +328,7 @@ def consultar_por_periodo():
                 print("¿Desea preservar los datos en un archivo?")
                 print("1. Exportar a Excel")
                 print("2. Exportar a CSV")
-                print("3. Regresar al menú de consultas")
+                print("3. Regresar al menú de notas")
                 opcion = int(input("Elija la opción: "))
                 datos=dict()
                 datos_grabar=(fecha, clave_c, nombre_c, rfc, correo, monto_p, servicio, costo_servicio)
