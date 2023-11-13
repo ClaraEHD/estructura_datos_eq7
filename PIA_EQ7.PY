@@ -432,7 +432,7 @@ def menu_clientes():
         elif eleccion==4:
            menu_consultas_clientes()
         elif eleccion==5:
-            break
+            menu_principal()
         else:
             print("Opción inválida")
 
