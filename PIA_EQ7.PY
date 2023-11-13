@@ -499,7 +499,6 @@ def suspende_cliente():
             if clientes:
                 print("CLIENTES ENCONTRADOS:\n")
                 
-                # Crear y mostrar la tabla
                 tabla = PrettyTable(["Clave", "Cliente", "RFC", "Correo"])
                 for cliente_info in clientes:
                     tabla.add_row(cliente_info)
