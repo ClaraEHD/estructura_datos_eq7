@@ -1081,7 +1081,7 @@ def generar_reporte_servicios_por_clave():
                     print("1. Exportar a CSV  \n2. Exportar a Excel  \n3. Regresar al menú de reportes")
                     opcion = input("\nElija una opción: ")
                     fecha_actual = datetime.datetime.now()
-                    fecha = fecha_actual.strftime("%m/%d/%Y")
+                    fecha = fecha_actual.strftime("%m-%d-%Y")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Clave", "Nombre de servicio", "Costo", "Estatus"])
                         exportar_a_csv_df(df, "ReporteServiciosPorClave", "nombre_archivo.csv",fecha)
@@ -1120,7 +1120,7 @@ def generar_reporte_servicios_por_nombre():
                     print("1. Exportar a CSV  \n2. Exportar a Excel  \n3. Regresar al menú de reportes")
                     opcion = input("\nElija una opción: ")
                     fecha_actual = datetime.datetime.now()
-                    fecha = fecha_actual.strftime("%m/%d/%Y")
+                    fecha = fecha_actual.strftime("%m-%d-%Y")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Nombre de servicio", "Clave", "Costo", "Estatus"])
                         exportar_a_csv_df(df, "ReporteServiciosPorNombre", "nombre_archivo.csv", fecha)
