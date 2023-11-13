@@ -267,7 +267,7 @@ def menu_consultas_notas():
             print("\n--- Submenú Consultas y Reportes ---")
             print("1. Consulta por período")
             print("2. Consulta por folio")
-            print("3. Regresa al menú principal")
+            print("3. Volver al menú de notas")
             subopcion = input("Seleccione una opción: ")
             if subopcion == "1":
                 consultar_por_periodo()
@@ -426,7 +426,7 @@ def menu_clientes():
         elif eleccion==4:
            menu_consultas_clientes()
         elif eleccion==5:
-            return
+            menu_principal()
         else:
             print("Opción inválida")
 
@@ -594,7 +594,7 @@ def menu_consultas_clientes():
         print("Listado de clientes registrados ")
         print("1. Ordenado por clave")
         print("2. Ordenado por nombre")
-        print("3. Volver al menú anterior")
+        print("3. Volver al menú de clientes")
         opcion=int(input("Elija una opcion: "))
         if opcion==1:
             ordenar_por_clave_clientes()
