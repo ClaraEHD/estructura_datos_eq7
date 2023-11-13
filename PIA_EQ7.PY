@@ -27,7 +27,7 @@ def menu_principal():
             menu_estadisticas()
         elif op == 5:
             print("Saliendo del programa...")
-            break
+            exit()
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
