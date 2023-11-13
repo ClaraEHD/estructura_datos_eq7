@@ -49,7 +49,7 @@ def menu_notas():
         elif opcion == 4:
             menu_consultas_notas()
         elif opcion == 5:
-            menu_principal()
+            break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
@@ -184,19 +184,19 @@ def cancelar_nota():
                         table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, id_servicio, n_servicio, c_servicio, monto_p])
                     print(table)
 
-                    print("¿Desea confirmar la cancelación de la nota?")
+                    print("¿Desea confirmar la cancelación de la nota? si/no:")
                     cancelar = input().upper()
                     if cancelar == "SI":
                         mi_cursor.execute("""UPDATE NOTAS SET estatus=0 WHERE FOLIO=:folio""", values)
                         print("Nota cancelada con éxito.")
                         conn.commit()
-                        menu_notas()
+                        return
                     elif cancelar == "NO":
                         print("Volviendo al menú de notas")
-                        menu_notas()
+                        return
                 else:
                     print("No se encontraron coincidencias")
-                    menu_notas()
+                    return
         except Error as e:
             print(e)
         except Exception:
@@ -433,7 +433,7 @@ def menu_clientes():
         elif eleccion==4:
            menu_consultas_clientes()
         elif eleccion==5:
-            menu_principal()
+            break
         else:
             print("Opción inválida")
 
@@ -442,11 +442,10 @@ def agregar_cliente():
     print("Agregar Cliente: \n")
     while True:
         rfc = input("Por favor, ingrese su RFC: ")
-        validar_rfc(rfc)
-        if validar_rfc(rfc):
-            break
-        else:
+        if not validar_rfc(rfc):
             print(f"RFC {rfc} no válido. Ingrese un RFC válido.")
+            continue
+        break
 
     while True:  
         nombre = input("Ingresa el nombre completo del cliente: ")
@@ -459,23 +458,24 @@ def agregar_cliente():
         correo = input("Ingresa un correo electrónico: ")
         if (correo.strip()==""):
             print("El correo no puede ser omitido")
-        elif (validar_correo(correo)):
-            break 
+        elif not validar_correo(correo):
+            print("Correo electrónico no válido. Ingrese un correo válido.")
+        else:
+            break
+            
     estatus=1
-    while True:
-        try:
-            with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
-                valores=(rfc, nombre, correo, estatus)
-                mi_cursor.execute("INSERT INTO CLIENTES (RFC, cliente, correo, estatus) VALUES(?,?,?,?)",valores)
-                print("Datos insertados correctamente")          
-                break      
-        except Error as e:
-            print(e)
-        except Exception:
-            print(f"Se produjo el error: {sys.exc_info()}")
-        finally:
-            conn.close()
+    try:
+        with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
+            mi_cursor=conn.cursor()
+            valores=(rfc, nombre, correo, estatus)
+            mi_cursor.execute("INSERT INTO CLIENTES (RFC, cliente, correo, estatus) VALUES(?,?,?,?)",valores)
+            print("Datos insertados correctamente")          
+    except Error as e:
+        print(e)
+    except Exception:
+        print(f"Se produjo el error: {sys.exc_info()}")
+    finally:
+        conn.close()
 
 def ejecutar_query(conn, query, valores=None):
     try:
@@ -511,7 +511,7 @@ def suspende_cliente():
                         clave_c = int(clave_c)
                         if clave_c == 0:
                             print("Volviendo al menú de consultas")
-                            break
+                            return
                         else:
                             valores = {"clave_cliente": clave_c}
                             cliente_info = ejecutar_query(conn, "SELECT clave_cliente, cliente, RFC, correo FROM CLIENTES WHERE clave_cliente=:clave_cliente AND estatus=1", valores)
@@ -610,7 +610,7 @@ def menu_consultas_clientes():
         elif opcion==3:
             menu_clientes()
         elif opcion==3:
-            return
+            break
         else:
             ("Opción inválida")
 
@@ -695,14 +695,10 @@ def ordenar_por_nombre_clientes():
                             exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
                         elif op_Ex == 2:
                             exportar_a_csv(datos, columnas,nombre_archivo, fecha)
-                        break
                     elif opcion == 2:
                         return
-                        
                 else: 
                     print("No se encontraron coincidencias")
-                    return
-                    
         except Error as e:
             print(e)
         except Exception:
@@ -823,41 +819,44 @@ def generar_reporte_servicios_por_clave():
 
 
 def menu_estadisticas():
-    print("\n--- Menú de estadisticos ---")
-    print("1. Servicios más prestados")
-    print("2. Clientes con más notas")
-    print("3. Promedio de monto de las notas por periodo")
-    print("4. Volver al menú")
-    op=int(input("Ingrese la opcion que desee realizar: "))
-    if op==1:
-        servicio_mas_prestado()
-    elif op==2:
-        clientes_mas_notas()
-    elif op==3:
-        promedio_montos_notas()
-    elif op==4:
-        menu_principal()
-    else:
-        print("Opcion no válida")
+    while True:
+        print("\n--- Menú de estadisticos ---")
+        print("1. Servicios más prestados")
+        print("2. Clientes con más notas")
+        print("3. Promedio de monto de las notas por periodo")
+        print("4. Volver al menú")
+        op=int(input("Ingrese la opcion que desee realizar: "))
+        if op==1:
+            servicio_mas_prestado()
+        elif op==2:
+            clientes_mas_notas()
+        elif op==3:
+            promedio_montos_notas()
+        elif op==4:
+            break
+        else:
+            print("Opcion no válida")
 
-def servicio_mas_prestado():    
+def servicio_mas_prestado():
     try:
-        cant_Servicios=int(input("\nIngrese la cantidad de servicios más prestados que desea ver "))
-        if cant_Servicios==0:
+        cant_Servicios = int(input("\nIngrese la cantidad de servicios más prestados que desea ver: "))
+        if cant_Servicios == 0:
             print("Ingrese un número válido")
+            return
         fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa: ")
         fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
         fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa: ")
         fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
         if fecha_final < fecha_inicial:
             print("La fecha final debe ser igual o posterior a la fecha inicial.")
-            return        
+            return
     except ValueError:
         print("Fecha ingresada inválida.")
+        return
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
+                mi_cursor = conn.cursor()
                 mi_cursor.execute("""
                     SELECT SERVICIOS.nombre_servicio, COUNT(NOTAS.id_servicio) as cantidad 
                     FROM NOTAS 
@@ -869,48 +868,46 @@ def servicio_mas_prestado():
                 registros = mi_cursor.fetchall()
                 if registros:
                     print(f"Listado los {cant_Servicios} más prestados entre las fechas:\n")
-                    print("Nombre \tCantidad")
+                    table = PrettyTable(["Nombre", "Cantidad"])
                     for nombre, cantidad in registros:
-                        print(f"\n{nombre} \t\t {cantidad}")
+                        table.add_row([nombre, cantidad])
+                    print(table)
                     print("\n¿Desea exportar el resultado o desea volver al menú? ")
-                    opcion=int(input("\n1. Exportar \n2. Volver al menú de consultas \n"))
-                    if opcion==1:
-                        datos=dict()
-                        datos_grabar=(nombre, cantidad)
-                        datos_grabar
-                        columnas= "Nombre", "Cantidad"
-                        nombre_archivo="ReporteServiciosMasPrestados"
-                        fecha1=fecha_inicial.strftime("%m-%d-%Y")
-                        fecha2=fecha_final.strftime("%m-%d-%Y")                
-                        fecha=f"{fecha1}_{fecha2}"
-                        op_Ex=int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
-                        if op_Ex==1:
-                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
-                        elif op_Ex==2:
-                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
+                    opcion = int(input("\n1. Exportar \n2. Volver al menú de consultas \n"))
+                    if opcion == 1:
+                        datos = []
+                        for nombre, cantidad in registros:
+                            datos.append([nombre, cantidad])
+                        columnas = ["Nombre", "Cantidad"]
+                        nombre_archivo = "ReporteServiciosMasPrestados"
+                        fecha1 = fecha_inicial.strftime("%m-%d-%Y")
+                        fecha2 = fecha_final.strftime("%m-%d-%Y")
+                        fecha = f"{fecha1}_{fecha2}"
+                        op_Ex = int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
+                        if op_Ex == 1:
+                            exportar_a_excel_df(datos, columnas, nombre_archivo, fecha)
+                        elif op_Ex == 2:
+                            exportar_a_csv(datos, columnas, nombre_archivo, fecha)
                         break
-                    elif opcion==2:
-                            menu_estadisticas()    
-                    break       
-                else: 
+                    elif opcion == 2:
+                        break
+                else:
                     print("No se encontraron coincidencias")
-                    menu_estadisticas()
+                    break
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-            menu_estadisticas()
 
-    
-
-def clientes_mas_notas():  
+def clientes_mas_notas():
     try:
         while True:
-            cant_clientes=int(input("\nIngrese la cantidad clientes con más notas que desea ver "))
-            if cant_clientes==0:
+            cant_clientes = int(input("\nIngrese la cantidad clientes con más notas que desea ver: "))
+            if cant_clientes == 0:
                 print("Ingrese un número válido")
+                return
             else:
                 fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa: ")
                 fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
@@ -918,13 +915,16 @@ def clientes_mas_notas():
                 fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
                 if fecha_final < fecha_inicial:
                     print("La fecha final debe ser igual o posterior a la fecha inicial.")
-                else: break
+                else:
+                    break
     except ValueError:
         print("Fecha ingresada inválida.")
+        return
+
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
+                mi_cursor = conn.cursor()
                 mi_cursor.execute("""
                     SELECT CLIENTES.cliente, COUNT(NOTAS.clave_cliente) as cantidad 
                     FROM NOTAS 
@@ -936,38 +936,37 @@ def clientes_mas_notas():
                 registros = mi_cursor.fetchall()
                 if registros:
                     print(f"Listado los {cant_clientes} clientes con más notas entre las fechas:\n")
-                    print("Nombre \tCantidad")
+                    table = PrettyTable(["Nombre", "Cantidad"])
                     for nombre, cantidad in registros:
-                        print(f"\n{nombre} \t {cantidad}")
+                        table.add_row([nombre, cantidad])
+                    print(table)
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
-                    opcion=int(input("1. Exportar \n2. Volver al menú de consultas \n"))
-                    if opcion==1:
-                        datos=dict()
-                        datos_grabar=(nombre, cantidad)
-                        datos_grabar
-                        columnas= "Nombre", "Cantidad"
-                        nombre_archivo="ReporteClientesConMasNotas"
-                        fecha1=fecha_inicial.strftime("%m-%d-%Y")
-                        fecha2=fecha_final.strftime("%m-%d-%Y")                
-                        fecha=f"{fecha1}_{fecha2}"
-                        op_Ex=int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
-                        if op_Ex==1:
-                            exportar_a_excel_df(datos, columnas,nombre_archivo, fecha)
-                        elif op_Ex==2:
-                            exportar_a_csv(datos, columnas,nombre_archivo, fecha)
-                    elif opcion==2:
-                            menu_estadisticas()    
-                    break       
-                else: 
+                    opcion = int(input("1. Exportar \n2. Volver al menú de consultas \n"))
+                    if opcion == 1:
+                        datos = []
+                        for nombre, cantidad in registros:
+                            datos.append([nombre, cantidad])
+                        columnas = ["Nombre", "Cantidad"]
+                        nombre_archivo = "ReporteClientesConMasNotas"
+                        fecha1 = fecha_inicial.strftime("%m-%d-%Y")
+                        fecha2 = fecha_final.strftime("%m-%d-%Y")
+                        fecha = f"{fecha1}_{fecha2}"
+                        op_Ex = int(input("\n1. Exportar a excel \n2. Exportar a cvs \n"))
+                        if op_Ex == 1:
+                            exportar_a_excel_df(datos, columnas, nombre_archivo, fecha)
+                        elif op_Ex == 2:
+                            exportar_a_csv(datos, columnas, nombre_archivo, fecha)
+                    elif opcion == 2:
+                        break
+                else:
                     print("No se encontraron coincidencias")
-                    menu_estadisticas()
+                    break
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-            menu_estadisticas()
 
 def promedio_montos_notas():
     try:
@@ -977,13 +976,15 @@ def promedio_montos_notas():
         fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
         if fecha_final < fecha_inicial:
             print("La fecha final debe ser igual o posterior a la fecha inicial.")
-            return        
+            return
     except ValueError:
         print("Fecha ingresada inválida.")
+        return
+
     while True:
         try:
             with sqlite3.connect("BD_TALLER_MECANICO.db") as conn:
-                mi_cursor=conn.cursor()
+                mi_cursor = conn.cursor()
                 mi_cursor.execute("""SELECT AVG(monto_pago) as promedio 
                         FROM NOTAS 
                         WHERE fecha BETWEEN ? AND ?
@@ -991,21 +992,20 @@ def promedio_montos_notas():
                 registros = mi_cursor.fetchone()
                 if registros:
                     print(f"Promedio de pago de las notas en el periodo :\n")
-                    print("Promedio")
+                    table = PrettyTable(["Promedio"])
                     for Promedio in registros:
-                        print(f"\n{Promedio}")
-                    break       
-                else: 
+                        table.add_row([Promedio])
+                    print(table)
+                    break
+                else:
                     print("No se encontraron coincidencias")
-                    menu_estadisticas()
+                    break
         except Error as e:
-            print (e)
+            print(e)
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
             conn.close()
-            menu_estadisticas()
-
 
 
 def exportar_a_excel(datos, nombre_archivo):
