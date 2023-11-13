@@ -342,7 +342,7 @@ def consultar_por_periodo():
                 if opcion == 1:
                     df = pd.DataFrame(notas, columns=["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo",
                                      "Monto de pago", "Servicio", "Costo del servicio"])
-                    exportar_a_excel(df, "ReportePorPeriodo", "nombre_archivo.xlsx", fecha)
+                    exportar_a_csv_df(df, "ReportePorPeriodo", "nombre_archivo.csv", fecha)
                 elif opcion == 2:
                     df = pd.DataFrame(notas, columns=["Folio", "Fecha", "Clave del cliente", "Cliente", "RFC", "Correo",
                                      "Monto de pago", "Servicio", "Costo del servicio"])
