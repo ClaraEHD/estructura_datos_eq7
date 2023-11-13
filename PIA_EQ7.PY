@@ -47,7 +47,7 @@ def menu_notas():
         elif opcion == 4:
             menu_consultas_notas()
         elif opcion == 5:
-            return
+            menu_principal()
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
@@ -185,8 +185,9 @@ def cancelar_nota():
                     print("¿Desea confirmar la cancelación de la nota?")
                     cancelar = input().upper()
                     if cancelar == "SI":
-                        mi_cursor.execute("UPDATE NOTAS SET estatus=0 WHERE FOLIO=:folio", values)
+                        mi_cursor.execute("""UPDATE NOTAS SET estatus=0 WHERE FOLIO=:folio""", values)
                         print("Nota cancelada con éxito.")
+                        conn.commit()
                         menu_notas()
                     elif cancelar == "NO":
                         print("Volviendo al menú de notas")
@@ -243,6 +244,8 @@ def recuperar_nota_cancelada():
                                 values = {"folio": cancelar_folio}
                                 mi_cursor.execute("UPDATE NOTAS SET estatus=1 WHERE folio=:folio", values)
                                 print("Nota recuperada exitosamente")
+                                conn.commit()
+                                return
                             else:
                                 print("La nota no fue recuperada\nVolviendo al menú de consultas de notas")
                                 return
@@ -262,6 +265,7 @@ def recuperar_nota_cancelada():
         except Exception:
             print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         finally:
+            
             conn.close()
 
 def menu_consultas_notas():
