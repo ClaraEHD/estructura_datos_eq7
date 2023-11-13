@@ -905,16 +905,18 @@ def servicio_mas_prestado():
 
 def clientes_mas_notas():  
     try:
-        cant_clientes=int(input("\nIngrese la cantidad clientes con más notas que desea ver "))
-        if cant_clientes==0:
-            print("Ingrese un número válido")
-        fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa: ")
-        fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
-        fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa: ")
-        fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
-        if fecha_final < fecha_inicial:
-            print("La fecha final debe ser igual o posterior a la fecha inicial.")
-            return        
+        while True:
+            cant_clientes=int(input("\nIngrese la cantidad clientes con más notas que desea ver "))
+            if cant_clientes==0:
+                print("Ingrese un número válido")
+            else:
+                fecha_inicial_str = input("Ingrese la fecha inicial dd/mm/aaaa: ")
+                fecha_inicial = datetime.datetime.strptime(fecha_inicial_str, "%d/%m/%Y").date()
+                fecha_final_str = input("Ingrese la fecha final dd/mm/aaaa: ")
+                fecha_final = datetime.datetime.strptime(fecha_final_str, "%d/%m/%Y").date()
+                if fecha_final < fecha_inicial:
+                    print("La fecha final debe ser igual o posterior a la fecha inicial.")
+                else: break
     except ValueError:
         print("Fecha ingresada inválida.")
     while True:
