@@ -27,7 +27,7 @@ def menu_principal():
             menu_estadisticas()
         elif op == 5:
             print("Saliendo del programa...")
-            exit()
+            break
         else:
             print("Opción inválida. Por favor, elija una opción válida.")
 
@@ -184,7 +184,7 @@ def cancelar_nota():
                         table.add_row([folio, fecha, clave_c, nombre_c, rfc, correo, id_servicio, n_servicio, c_servicio, monto_p])
                     print(table)
 
-                    print("¿Desea confirmar la cancelación de la nota? si/no:")
+                    print("¿Desea confirmar la cancelación de la nota? si/no: ")
                     cancelar = input().upper()
                     if cancelar == "SI":
                         mi_cursor.execute("""UPDATE NOTAS SET estatus=0 WHERE FOLIO=:folio""", values)
@@ -219,7 +219,7 @@ def recuperar_nota_cancelada():
                         table.add_row([folio, fecha, clave_cliente])
                     print(table)
 
-                    print("¿Desea recuperar una nota?")
+                    print("¿Desea recuperar una nota? si/no: ")
                     respuesta = input().upper()
 
                     if respuesta == "SI":
@@ -240,7 +240,7 @@ def recuperar_nota_cancelada():
                             table.add_row([nota[0], nota[1], nota[2], nota[3], nota[4], nota[5], nota[6], nota[7], nota[8], nota[9]])
                             print(table)
 
-                            res = input("¿Desea confirmar la recuperación? ").upper()
+                            res = input("¿Desea confirmar la recuperación? si/no: ").upper()
 
                             if res == "SI":
                                 values = {"folio": cancelar_folio}
@@ -432,10 +432,9 @@ def menu_clientes():
         elif eleccion==4:
            menu_consultas_clientes()
         elif eleccion==5:
-            menu_principal()
+            break
         else:
             print("Opción inválida")
-
 
 def agregar_cliente():
     print("Agregar Cliente: \n")
@@ -606,8 +605,6 @@ def menu_consultas_clientes():
         elif opcion==2:
             ordenar_por_nombre_clientes()
         elif opcion==3:
-            menu_clientes()
-        elif opcion==3:
             break
         else:
             ("Opción inválida")
@@ -629,7 +626,7 @@ def ordenar_por_clave_clientes():
                     print(tabla)
                     
                     print("\n¿Desea exportar el resultado o desea volver al menú?")
-                    opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n"))
+                    opcion = int(input("1. Exportar \n2. Volver al menú de consultas\n "))
                     
                     if opcion == 1:
                         df = pd.DataFrame(clientes, columns=["Clave", "Cliente", "RFC", "Correo"])
@@ -1204,5 +1201,3 @@ def crear_tablas():
 
 crear_tablas()
 menu_principal()
-
-
