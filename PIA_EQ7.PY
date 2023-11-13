@@ -1080,13 +1080,15 @@ def generar_reporte_servicios_por_clave():
                 while True:
                     print("1. Exportar a CSV  \n2. Exportar a Excel  \n3. Regresar al menú de reportes")
                     opcion = input("\nElija una opción: ")
+                    fecha_actual = datetime.datetime.now()
+                    fecha = fecha_actual.strftime("%m/%d/%Y")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Clave", "Nombre de servicio", "Costo", "Estatus"])
-                        exportar_a_csv_df(df, "ReporteServiciosPorClave", "nombre_archivo.csv")
+                        exportar_a_csv_df(df, "ReporteServiciosPorClave", "nombre_archivo.csv",fecha)
                         break
                     elif opcion == '2':
                         df = pd.DataFrame(servicios, columns=["Clave", "Nombre de servicio", "Costo", "Estatus"])
-                        exportar_a_excel(df, "ReporteServiciosPorClave", "nombre_archivo.xlsx")
+                        exportar_a_excel(df, "ReporteServiciosPorClave", "nombre_archivo.xlsx", fecha)
                         break
                     elif opcion == '3':
                         return
@@ -1117,6 +1119,8 @@ def generar_reporte_servicios_por_nombre():
                 while True:
                     print("1. Exportar a CSV  \n2. Exportar a Excel  \n3. Regresar al menú de reportes")
                     opcion = input("\nElija una opción: ")
+                    fecha_actual = datetime.datetime.now()
+                    fecha = fecha_actual.strftime("%m/%d/%Y")
                     if opcion == '1':
                         df = pd.DataFrame(servicios, columns=["Nombre de servicio", "Clave", "Costo", "Estatus"])
                         exportar_a_csv_df(df, "ReporteServiciosPorNombre", "nombre_archivo.csv")
